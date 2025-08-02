@@ -9,7 +9,7 @@
 .netlify
 
 # Sensitive files
-podcast-automation.json
+
 
 # System files
 .DS_Store

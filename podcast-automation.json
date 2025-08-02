@@ -1,0 +1,3 @@
+{
+  "NOTE": "Sensitive credentials have been removed for security. Use environment variables or a secure secret manager for production."
+}
