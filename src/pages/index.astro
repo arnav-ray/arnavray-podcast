@@ -1,0 +1,140 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const bunches = [
+  { name: 'AI & Tech', slug: 'ai-tech' },
+  { name: 'Finance & Business', slug: 'finance-business' },
+  { name: 'Leadership & Strategic Thinking', slug: 'leadership-strategic-thinking' },
+  { name: 'Science, Research & Innovation', slug: 'science-research-innovation' },
+  { name: 'Sunday Specials (Lifestyle, Humor, etc.)', slug: 'sunday-specials' }
+];
+
+const langOptions = [
+  { label: 'English', value: 'en' },
+  { label: 'German', value: 'de' }
+];
+
+const selectedLang = Astro.url.searchParams.get('lang') || 'en';
+---
+
+<BaseLayout title="Podcast Home">
+  <div class="main-container">
+    <h1 class="main-title">Welcome to the Automated Podcast</h1>
+    <p class="subtitle">Choose your language and a category to explore episodes.</p>
+
+    <div class="toggle-row">
+      <a href="/?lang=en" class={`lang-btn${selectedLang === 'en' ? ' active' : ''}`}>English</a>
+      <a href="/?lang=de" class={`lang-btn${selectedLang === 'de' ? ' active' : ''}`}>German</a>
+    </div>
+
+    <div class="bunch-tiles">
+      {bunches.map((bunch) => (
+        <a href={`/${selectedLang}/${bunch.slug}`} class="bunch-tile">
+          <span>{bunch.name}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+.lang-btn {
+  background: var(--card-color);
+  border: 1px solid var(--border-color);
+  color: var(--primary-color);
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  margin: 0 0.5rem;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.lang-btn.active, .lang-btn:hover {
+  background: var(--primary-color);
+  color: var(--bg-color);
+}
+
+:root {
+  --bg-color: #031926;
+  --card-color: rgba(3, 41, 54, 0.5);
+  --border-color: rgba(38, 70, 83, 0.5);
+  --primary-color: #3ec6e0;
+  --text-color: #b8d8e3;
+  --heading-color: #e0f7fa;
+  --shadow-color: rgba(0, 47, 75, 0.4);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+.main-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 4rem 1rem 2rem 1rem;
+  text-align: center;
+}
+
+.main-title {
+  color: var(--heading-color);
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.subtitle {
+  color: var(--text-color);
+  font-size: 1.2rem;
+  margin-bottom: 2.5rem;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.bunch-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.bunch-tile {
+  background: var(--card-color);
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+  box-shadow: 0 8px 32px 0 var(--shadow-color);
+  padding: 2rem 1rem;
+  color: var(--heading-color);
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bunch-tile:hover {
+  background: var(--primary-color);
+  color: var(--bg-color);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 12px 40px var(--shadow-color);
+}
+
+@media (max-width: 600px) {
+  .bunch-tiles {
+    grid-template-columns: 1fr;
+  }
+  .main-container {
+    padding: 2rem 0.5rem;
+  }
+}
+</style>

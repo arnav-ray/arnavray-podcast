@@ -1,0 +1,37 @@
+---
+export const prerender = true;
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getPodcastEpisodes } from '../../../lib/sheets.js';
+
+export async function getStaticPaths() {
+  const episodes = await getPodcastEpisodes();
+  console.log('DEBUG: Static paths generated:', episodes.map(ep => ({ lang: ep.language, bunch: ep.bunch, slug: ep.slug })));
+  return episodes.map(ep => ({ params: { lang: ep.language, bunch: ep.bunch, slug: ep.slug }, props: { episode: ep } }));
+}
+const { episode } = Astro.props;
+const { lang } = Astro.params;
+console.log('DEBUG: Astro.params:', Astro.params);
+console.log('DEBUG: Astro.props:', Astro.props);
+---
+{episode ? (
+  <BaseLayout title={episode.headline}>
+    <div class="container">
+      <nav><a href={`/${lang}`}>&larr; Back to all episodes</a></nav>
+      <article>
+        <h1>{episode.headline}</h1>
+        <p>Category: {episode.bunch} | Published: {new Date(episode.publishDate).toLocaleDateString(lang)}</p>
+        <audio controls src={episode.mp3Url} style="width:100%;margin:2rem 0;"></audio>
+        <h2>Transcript</h2>
+        <pre style="white-space:pre-wrap;background:#1a1a1a;padding:1.5rem;border-radius:8px;">{episode.script}</pre>
+      </article>
+    </div>
+  </BaseLayout>
+) : (
+  <BaseLayout title="Episode Not Found">
+    <div class="container">
+      <h1>Episode Not Found</h1>
+      <p>The requested episode could not be found. Please check the URL or return to the episodes list.</p>
+    </div>
+  </BaseLayout>
+)}
+<style>.container{max-width:800px;margin:auto;padding:2rem}</style>

@@ -1,0 +1,102 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPodcastEpisodes } from '../../lib/sheets.js';
+
+export async function getStaticPaths() {
+  const bunches = [
+    'ai-tech',
+    'finance-business', 
+    'leadership-strategic-thinking',
+    'science-research-innovation',
+    'sunday-specials'
+  ];
+
+  const languages = ['en', 'de'];
+
+  return languages.flatMap(lang => 
+    bunches.map(bunch => ({
+      params: { lang, bunch }
+    }))
+  );
+}
+
+const { lang, bunch } = Astro.params;
+const allEpisodes = await getPodcastEpisodes();
+const episodes = allEpisodes.filter(ep => 
+  ep.language === lang && ep.bunch === bunch
+);
+
+const bunchNames = {
+  'ai-tech': 'AI & Tech',
+  'finance-business': 'Finance & Business',
+  'leadership-strategic-thinking': 'Leadership & Strategic Thinking',
+  'science-research-innovation': 'Science, Research & Innovation',
+  'sunday-specials': 'Sunday Specials (Lifestyle, Humor, etc.)'
+};
+
+const bunchName = bunchNames[bunch] || bunch;
+const langName = lang === 'en' ? 'English' : 'German';
+---
+
+<BaseLayout title={`${bunchName} - ${langName} Episodes`}>
+  <div class="container">
+    <h1>{bunchName} - {langName} Episodes</h1>
+    <a href={`/?lang=${lang}`}>&larr; Back to Home</a>
+
+    {episodes.length === 0 ? (
+      <p>No episodes found for this category.</p>
+    ) : (
+      <ul>
+        {episodes.map(ep => (
+          <li>
+            <a href={`/${ep.language}/${ep.bunch}/${ep.slug}`}>
+              {ep.headline}
+            </a>
+            <span>({new Date(ep.publishDate).toLocaleDateString(lang)})</span>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+h1 {
+  color: var(--heading-color);
+  margin-bottom: 1rem;
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: var(--card-color);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+span {
+  color: var(--text-color);
+  margin-left: 1rem;
+  font-size: 0.9rem;
+}
+</style>

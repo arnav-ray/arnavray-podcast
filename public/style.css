@@ -1,0 +1,16 @@
+:root {
+  --accent: #2337ff;
+  --accent-dark: #000d8a;
+  --black: 15, 18, 25;
+  --white: 255, 255, 255;
+  --gray: 96, 115, 159;
+  --gray-light: 229, 233, 240;
+  --gray-dark: 34, 41, 57;
+}
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: rgb(var(--gray-dark));
+  color: rgb(var(--white));
+}

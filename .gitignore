@@ -1,7 +1,15 @@
-node_modules/
-dist/
-.astro/
+# Dependencies
+/node_modules/
+
+# Astro build output
+/dist/
+
+# Environment variables
 .env
-.env.local
+.netlify
+
+# Sensitive files
+podcast-automation.json
+
+# System files
 .DS_Store
-*.log

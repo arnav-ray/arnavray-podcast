@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPodcastEpisodes } from '../../lib/sheets.js';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'de' } },
+  ];
+}
+
+export const prerender = true;
+
+const { lang } = Astro.params;
+const allEpisodes = await getPodcastEpisodes();
+const episodes = allEpisodes.filter(ep => ep.language === lang);
+---
+
+<BaseLayout title={`${lang === 'en' ? 'English' : 'German'} Episodes`}>
+  <div class="container">
+    <h1>All {lang === 'en' ? 'English' : 'German'} Episodes</h1>
+    <a href="/"> &larr; Back to Home</a>
+    <ul>
+      {episodes.map(ep => (
+        <li>
+          <a href={`/${ep.language}/${ep.bunch}/${ep.slug}`}>{ep.headline}</a>
+          <span>({new Date(ep.publishDate).toLocaleDateString(lang)})</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</BaseLayout>
