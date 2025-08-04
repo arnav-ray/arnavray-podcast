@@ -1,58 +1,137 @@
-// Automated Podcast Generation Function for Netlify
+// Enhanced Automated Podcast Generation Function for Netlify
 const RSS_SOURCES = {
   "ai-tech": {
     "en": [
       "https://techcrunch.com/feed/",
       "https://feeds.arstechnica.com/arstechnica/index",
-      "https://www.theverge.com/rss/index.xml"
+      "https://www.theverge.com/rss/index.xml",
+      "https://www.wired.com/feed/rss",
+      "https://venturebeat.com/feed/",
+      "https://thenextweb.com/feed/",
+      "https://feeds.feedburner.com/TheHackersNews"
     ],
     "de": [
       "https://www.heise.de/rss/heise-atom.xml",
-      "https://rss.golem.de/rss.php?feed=ATOM1.0"
+      "https://rss.golem.de/rss.php?feed=ATOM1.0",
+      "https://www.computerbild.de/rss/tests.xml",
+      "https://t3n.de/rss.xml",
+      "https://www.chip.de/rss/rss_overblick.xml"
     ]
   },
-  "business": {
+  "finance-business": {
     "en": [
-      "https://feeds.reuters.com/reuters/businessNews"
+      "https://feeds.bloomberg.com/markets/news.rss",
+      "https://feeds.reuters.com/reuters/businessNews",
+      "https://feeds.fortune.com/fortune/finance",
+      "https://www.cnbc.com/id/10001147/device/rss/rss.html",
+      "https://feeds.wsj.com/wsj/xml/rss/3_7085.xml",
+      "https://feeds.ft.com/rss/home"
     ],
     "de": [
-      "https://www.handelsblatt.com/contentexport/feed/technik"
+      "https://www.handelsblatt.com/contentexport/feed/top-themen",
+      "https://www.manager-magazin.de/rss",
+      "https://www.wiwo.de/contentexport/feed/rss/schlagzeilen",
+      "https://www.capital.de/feed/rss",
+      "https://www.finance-magazin.de/feed/"
     ]
   },
-  "science": {
+  "leadership-strategy": {
     "en": [
-      "https://www.sciencedaily.com/rss/computers_math.xml"
+      "https://hbr.org/feed",
+      "https://feeds.feedburner.com/fastcompany/headlines",
+      "https://feeds.inc.com/home/updates",
+      "https://www.mckinsey.com/insights/rss",
+      "https://knowledge.wharton.upenn.edu/feed/",
+      "https://sloanreview.mit.edu/feed/"
     ],
     "de": [
-      "https://www.spektrum.de/alias/rss/spektrum-de-rss-feed/996406"
+      "https://www.manager-magazin.de/rss/ressort-unternehmen.xml",
+      "https://www.capital.de/karriere/feed/rss",
+      "https://www.impulse.de/feed.rss",
+      "https://www.brandeins.de/rss.xml"
     ]
   },
-  "health": {
+  "science-innovation": {
     "en": [
-      "https://www.medicalnewstoday.com/rss"
+      "https://www.sciencedaily.com/rss/computers_math.xml",
+      "https://feeds.nature.com/nature/rss/current",
+      "https://www.newscientist.com/feed/home/",
+      "https://phys.org/rss-feed/",
+      "https://feeds.sciencemag.org/rss/news_current.xml",
+      "https://feeds.popsci.com/c/34567/f/632419/index.rss"
     ],
     "de": [
-      "https://www.apotheken-umschau.de/rss/"
+      "https://www.spektrum.de/alias/rss/spektrum-de-rss-feed/996406",
+      "https://www.wissenschaft.de/feed/",
+      "https://www.scinexx.de/feed/",
+      "https://www.forschung-und-lehre.de/rss",
+      "https://www.laborpraxis.vogel.de/rss/news.xml"
     ]
   },
-  "politics": {
+  "sunday-specials": {
     "en": [
-      "https://feeds.reuters.com/reuters/politicsNews"
+      "https://lifehacker.com/rss",
+      "https://www.vox.com/rss/index.xml",
+      "https://feeds.mashable.com/Mashable",
+      "https://www.buzzfeed.com/world.xml",
+      "https://www.mentalfloss.com/feed",
+      "https://feeds.howstuffworks.com/DailyStuffPodcast"
     ],
     "de": [
-      "https://www.tagesschau.de/xml/rss2/"
+      "https://www.stern.de/feed/alle-nachrichten/",
+      "https://rss.sueddeutsche.de/rss/Panorama",
+      "https://www.welt.de/feeds/section/vermischtes.rss",
+      "https://www.bento.de/rss/feed.rss",
+      "https://www.jetzt.de/rss"
     ]
   }
 };
 
-// Simple RSS parser (no external dependencies)
+// Scoring system for article relevance and engagement
+function scoreArticle(article) {
+  let score = 0;
+  const title = article.title.toLowerCase();
+  const desc = article.description.toLowerCase();
+  
+  // Trending keywords (updated weekly in production)
+  const trendingKeywords = [
+    'ai', 'chatgpt', 'crypto', 'tesla', 'apple', 'google', 'microsoft',
+    'breakthrough', 'scandal', 'billion', 'million', 'record', 'first',
+    'revolutionary', 'disrupting', 'shocking', 'exclusive', 'breaking'
+  ];
+  
+  // Check for trending keywords
+  trendingKeywords.forEach(keyword => {
+    if (title.includes(keyword)) score += 3;
+    if (desc.includes(keyword)) score += 1;
+  });
+  
+  // Favor recent articles
+  const pubDate = new Date(article.pubDate);
+  const hoursOld = (Date.now() - pubDate) / (1000 * 60 * 60);
+  if (hoursOld < 6) score += 5;
+  else if (hoursOld < 24) score += 3;
+  else if (hoursOld < 72) score += 1;
+  
+  // Length preference (not too short, not too long)
+  if (desc.length > 100 && desc.length < 500) score += 2;
+  
+  // Engagement indicators
+  if (title.includes('?')) score += 1; // Questions engage readers
+  if (title.match(/\d+/)) score += 1; // Numbers attract attention
+  
+  return score;
+}
+
+// Enhanced RSS parser
 async function parseRSSFeed(url) {
   try {
     console.log(`Fetching RSS from: ${url}`);
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; PodcastBot/1.0)'
-      }
+        'User-Agent': 'Mozilla/5.0 (compatible; PodcastBot/2.0)'
+      },
+      timeout: 10000
     });
     
     if (!response.ok) {
@@ -63,12 +142,11 @@ async function parseRSSFeed(url) {
     const xmlText = await response.text();
     console.log(`RSS content length: ${xmlText.length} chars from ${url}`);
     
-    // Simple XML parsing for RSS items
     const items = [];
     const itemRegex = /<item[^>]*>([\s\S]*?)<\/item>/gi;
     let match;
     
-    while ((match = itemRegex.exec(xmlText)) !== null && items.length < 3) {
+    while ((match = itemRegex.exec(xmlText)) !== null && items.length < 10) {
       const item = match[1];
       
       // Extract title
@@ -85,80 +163,256 @@ async function parseRSSFeed(url) {
       
       // Extract publication date
       const pubDateMatch = item.match(/<pubDate[^>]*>(.*?)<\/pubDate>/i);
-      const pubDate = pubDateMatch ? pubDateMatch[1].trim() : '';
+      const pubDate = pubDateMatch ? pubDateMatch[1].trim() : new Date().toISOString();
       
       if (title && description) {
-        items.push({
-          title: title.substring(0, 100),
-          description: description.substring(0, 300),
+        const article = {
+          title: title.substring(0, 200),
+          description: description.substring(0, 500),
           link,
           pubDate,
           source: new URL(url).hostname
-        });
-        console.log(`Parsed article: ${title.substring(0, 50)}...`);
+        };
+        
+        // Calculate engagement score
+        article.score = scoreArticle(article);
+        
+        items.push(article);
+        console.log(`Parsed article: ${title.substring(0, 50)}... (score: ${article.score})`);
       }
     }
     
-    console.log(`Found ${items.length} articles from ${url}`);
-    return items;
+    // Sort by score and return top articles
+    return items.sort((a, b) => b.score - a.score);
   } catch (error) {
     console.error(`Error parsing RSS feed ${url}:`, error);
     return [];
   }
 }
 
-// Generate podcast script in dialogue format
-function generateDialogueScript(articles, bunch, language) {
+// Hot takes and humor generators
+const HOT_TAKES = {
+  "ai-tech": {
+    en: [
+      "This is giving me serious 'we're living in the future' vibes!",
+      "Plot twist of the century right here, folks!",
+      "Someone's definitely getting a strongly-worded email about this.",
+      "Well, that escalated quickly!",
+      "The tech bros are either crying or buying champagne right now.",
+      "This is why we can't have nice things in Silicon Valley.",
+      "I'm not saying it's revolutionary, but... okay, it's revolutionary.",
+      "Someone call the venture capitalists, they're going to lose their minds!"
+    ],
+    de: [
+      "Das ist ja mal wieder typisch Silicon Valley!",
+      "Tja, das haben die Experten wohl nicht kommen sehen.",
+      "Irgendwo weint gerade ein Startup-Gründer.",
+      "Das wird noch interessant werden!",
+      "Die Technik-Elite dreht gerade komplett durch.",
+      "Willkommen in der Zukunft, meine Damen und Herren!",
+      "Das ist der Stoff, aus dem Tech-Träume gemacht sind."
+    ]
+  },
+  "finance-business": {
+    en: [
+      "Someone's yacht payment just got a lot more complicated!",
+      "The Wall Street boys are sweating bullets right now.",
+      "This is what happens when MBAs run wild!",
+      "I can hear the champagne corks popping from here.",
+      "That's going to leave a mark on someone's portfolio!",
+      "The market is having a proper tantrum today.",
+      "Someone's definitely updating their LinkedIn profile after this."
+    ],
+    de: [
+      "Da wird jemand heute Abend viel Wein brauchen!",
+      "Die Börse macht wieder ihr eigenes Ding.",
+      "Irgendwo weint gerade ein Fondsmanager.",
+      "Das wird teuer, sehr teuer!",
+      "Die Analysten hatten mal wieder keine Ahnung.",
+      "Willkommen im Casino, äh, ich meine an der Börse!"
+    ]
+  },
+  "leadership-strategy": {
+    en: [
+      "That's MBA-speak for 'we have no idea what we're doing'!",
+      "Someone read too many business books this weekend.",
+      "This is why consultants drive Porsches!",
+      "The C-suite is about to get spicy!",
+      "That's a bold strategy, Cotton. Let's see if it pays off!",
+      "Someone's been watching too much Succession.",
+      "The corporate world just got a reality check!"
+    ],
+    de: [
+      "Das riecht nach teuren Beratern!",
+      "Jemand hat wohl zu viele Management-Bücher gelesen.",
+      "Die Chefetage wird das lieben... oder auch nicht.",
+      "Das ist mal wieder typisch Corporate!",
+      "Da hat jemand zu viel Harvard Business Review gelesen."
+    ]
+  },
+  "science-innovation": {
+    en: [
+      "Science just said 'hold my beer' to fiction!",
+      "The peer reviewers must have had a field day with this one!",
+      "This is what happens when you give scientists too much coffee.",
+      "Someone's Nobel Prize acceptance speech just got more interesting!",
+      "The laws of physics are having an identity crisis right now.",
+      "This discovery is chef's kiss level brilliant!",
+      "Science nerds around the world are losing their minds!"
+    ],
+    de: [
+      "Die Wissenschaft hat mal wieder alle überrascht!",
+      "Das wird die Lehrbücher umschreiben!",
+      "Irgendwo jubelt gerade ein Doktorand.",
+      "Die Peer-Reviewer hatten sicher Spaß dabei!",
+      "Wissenschaft ist einfach der Wahnsinn!"
+    ]
+  },
+  "sunday-specials": {
+    en: [
+      "This is the content we didn't know we needed!",
+      "Well, that's enough internet for today!",
+      "This is why aliens won't talk to us.",
+      "Someone had too much time on their hands!",
+      "The internet remains undefeated in weirdness.",
+      "This is peak human behavior right here!",
+      "I'm not even mad, I'm impressed!"
+    ],
+    de: [
+      "Das Internet ist wieder mal unbesiegbar!",
+      "Genug Internet für heute!",
+      "Menschen sind schon komisch.",
+      "Das ist der Inhalt, den wir verdienen!",
+      "Warum bin ich nicht überrascht?"
+    ]
+  }
+};
+
+// Generate spicy dialogue script with humor and hot takes
+function generateEnhancedDialogueScript(articles, bunch, language) {
   const hosts = {
-    en: { main: "Alex", expert: "Dr. Sarah" },
-    de: { main: "Michael", expert: "Dr. Schmidt" }
+    en: { 
+      main: "Alex Rivera", 
+      expert: "Dr. Sarah Chen",
+      style: "witty and energetic"
+    },
+    de: { 
+      main: "Michael Brenner", 
+      expert: "Dr. Lisa Schmidt",
+      style: "scharfsinnig und dynamisch"
+    }
   };
   
   const greetings = {
     en: {
-      intro: `Welcome to ${bunch.replace('-', ' ').toUpperCase()} Daily. I'm ${hosts.en.main}, and I'm here with ${hosts.en.expert}.`,
-      transition: "Let's dive into today's top stories."
+      intros: [
+        `Welcome back to ${bunch.replace('-', ' ').toUpperCase()} Daily, where we serve the news with a side of sass! I'm ${hosts.en.main}, your slightly caffeinated host.`,
+        `Good morning, afternoon, or whatever time you're procrastinating! This is ${bunch.replace('-', ' ').toUpperCase()} Daily. I'm ${hosts.en.main}, and I've had way too much coffee.`,
+        `Welcome to ${bunch.replace('-', ' ').toUpperCase()} Daily, the show that makes your commute slightly less boring. I'm ${hosts.en.main}, and I promise to make this worth your time.`
+      ],
+      transitions: [
+        "Let's dive into today's circus, shall we?",
+        "Buckle up, because today's news is wilder than my weekend.",
+        "Get ready for some stories that'll make you question reality."
+      ]
     },
     de: {
-      intro: `Willkommen zu ${bunch.replace('-', ' ').toUpperCase()} Daily. Ich bin ${hosts.de.main}, und hier ist ${hosts.de.expert}.`,
-      transition: "Schauen wir uns die wichtigsten Nachrichten von heute an."
+      intros: [
+        `Willkommen zu ${bunch.replace('-', ' ').toUpperCase()} Daily, wo wir die Nachrichten mit einer Prise Wahnsinn servieren! Ich bin ${hosts.de.main}.`,
+        `Guten Tag, oder wann auch immer Sie das hören! Hier ist ${bunch.replace('-', ' ').toUpperCase()} Daily. Ich bin ${hosts.de.main}, und ich hatte definitiv zu viel Kaffee.`
+      ],
+      transitions: [
+        "Tauchen wir ein in das heutige Chaos!",
+        "Schnallen Sie sich an, die heutigen News sind verrückter als mein Wochenende.",
+        "Bereiten Sie sich auf Geschichten vor, die Sie sprachlos machen werden."
+      ]
     }
   };
   
   const currentGreeting = greetings[language] || greetings.en;
   const currentHosts = hosts[language] || hosts.en;
+  const hotTakes = HOT_TAKES[bunch][language] || HOT_TAKES[bunch].en;
   
-  let script = `${currentHosts.main}: ${currentGreeting.intro} ${currentGreeting.transition}\n\n`;
+  // Random intro selection
+  const intro = currentGreeting.intros[Math.floor(Math.random() * currentGreeting.intros.length)];
+  const transition = currentGreeting.transitions[Math.floor(Math.random() * currentGreeting.transitions.length)];
+  
+  let script = `${currentHosts.main}: ${intro} And joining me is the brilliant ${currentHosts.expert}, who's here to add some actual intelligence to my hot takes.\n\n`;
+  
+  script += `${currentHosts.expert}: Thanks ${currentHosts.main.split(' ')[0]}! Though I think your hot takes are getting spicier by the day.\n\n`;
+  
+  script += `${currentHosts.main}: Well, speaking of spicy... ${transition}\n\n`;
   
   articles.forEach((article, index) => {
-    script += `${currentHosts.main}: ${currentHosts.expert}, let's talk about "${article.title}". What's your take on this?\n\n`;
+    // Add variety to introductions
+    const introductions = language === 'en' ? [
+      `Alright ${currentHosts.expert.split(' ')[1]}, this one's a doozy:`,
+      `Get this,`,
+      `Hold onto your coffee,`,
+      `You're going to love this:`,
+      `Plot twist incoming:`
+    ] : [
+      `Also ${currentHosts.expert.split(' ')[1]}, das hier ist der Hammer:`,
+      `Hör dir das an:`,
+      `Halt dich fest:`,
+      `Das wirst du lieben:`
+    ];
+    
+    const randomIntro = introductions[Math.floor(Math.random() * introductions.length)];
+    
+    script += `${currentHosts.main}: ${randomIntro} "${article.title}". ${hotTakes[Math.floor(Math.random() * hotTakes.length)]}\n\n`;
     
     script += `${currentHosts.expert}: ${article.description} `;
     
+    // Add analysis with personality
     if (language === 'en') {
-      script += `This is particularly interesting because it shows how rapidly this field is evolving. The implications for businesses and consumers could be significant.\n\n`;
+      const analyses = [
+        `What's fascinating here is the timing. This couldn't have come at a more interesting moment.`,
+        `The implications are huge. We're talking about a complete paradigm shift in how we think about this.`,
+        `This is exactly what industry insiders have been whispering about for months.`,
+        `The real story here isn't what they're saying - it's what they're NOT saying.`,
+        `This is going to ruffle some feathers in high places, mark my words.`
+      ];
       
-      if (index === articles.length - 1) {
-        script += `${currentHosts.main}: Great insights. Any final thoughts for our listeners?\n\n`;
-        script += `${currentHosts.expert}: I'd say keep an eye on this space. These developments are happening fast, and they'll likely impact how we work and live.\n\n`;
-        script += `${currentHosts.main}: Excellent. That's your ${bunch} update for today. Thanks for listening, and we'll see you tomorrow!\n\n`;
-      } else {
-        script += `${currentHosts.main}: Fascinating. What should people be watching for next?\n\n`;
-        script += `${currentHosts.expert}: The key thing to monitor is how this develops over the coming weeks. This could set important precedents.\n\n`;
+      script += analyses[Math.floor(Math.random() * analyses.length)] + `\n\n`;
+      
+      // Add banter
+      const banters = [
+        `${currentHosts.main}: Did you just use 'paradigm shift' unironically? That's peak expert behavior right there!\n\n${currentHosts.expert}: Hey, at least I didn't compare it to a Netflix show this time!`,
+        `${currentHosts.main}: See, this is why you have the PhD and I have the jokes.\n\n${currentHosts.expert}: Your jokes need a PhD to understand them sometimes!`,
+        `${currentHosts.main}: I love how you make even the wildest news sound reasonable.\n\n${currentHosts.expert}: And I love how you make reasonable news sound wild!`
+      ];
+      
+      if (index < articles.length - 1) {
+        script += banters[Math.floor(Math.random() * banters.length)] + `\n\n`;
       }
     } else {
-      script += `Das ist besonders interessant, weil es zeigt, wie schnell sich dieses Feld entwickelt. Die Auswirkungen für Unternehmen und Verbraucher könnten erheblich sein.\n\n`;
+      const analyses = [
+        `Was hier wirklich fasziniert, ist das Timing. Das hätte nicht zu einem spannenderen Zeitpunkt kommen können.`,
+        `Die Auswirkungen sind enorm. Wir sprechen hier von einem kompletten Umdenken.`,
+        `Das ist genau das, worüber Insider seit Monaten munkeln.`,
+        `Die wahre Geschichte ist nicht das, was sie sagen - sondern was sie NICHT sagen.`
+      ];
       
-      if (index === articles.length - 1) {
-        script += `${currentHosts.main}: Großartige Einblicke. Haben Sie abschließende Gedanken für unsere Hörer?\n\n`;
-        script += `${currentHosts.expert}: Ich würde sagen, behalten Sie diesen Bereich im Auge. Diese Entwicklungen passieren schnell und werden wahrscheinlich beeinflussen, wie wir arbeiten und leben.\n\n`;
-        script += `${currentHosts.main}: Ausgezeichnet. Das war Ihr ${bunch} Update für heute. Danke fürs Zuhören, wir sehen uns morgen!\n\n`;
-      } else {
-        script += `${currentHosts.main}: Faszinierend. Worauf sollten die Leute als nächstes achten?\n\n`;
-        script += `${currentHosts.expert}: Das Wichtigste ist zu beobachten, wie sich das in den kommenden Wochen entwickelt. Das könnte wichtige Präzedenzfälle schaffen.\n\n`;
+      script += analyses[Math.floor(Math.random() * analyses.length)] + `\n\n`;
+      
+      if (index < articles.length - 1) {
+        script += `${currentHosts.main}: Du klingst schon wieder wie ein Lehrbuch!\n\n`;
+        script += `${currentHosts.expert}: Und du klingst wie ein aufgeregter Podcast-Host!\n\n`;
       }
     }
   });
+  
+  // Epic closing
+  if (language === 'en') {
+    script += `${currentHosts.main}: And that's your daily dose of ${bunch.replace('-', ' ')} madness! Any final wisdom bombs, ${currentHosts.expert.split(' ')[1]}?\n\n`;
+    script += `${currentHosts.expert}: Just remember: in a world of hot takes and breaking news, sometimes the smartest move is to wait for the dust to settle. But where's the fun in that?\n\n`;
+    script += `${currentHosts.main}: Spoken like a true expert who secretly loves the chaos! That's all for today, folks. Remember to stay curious, stay skeptical, and stay slightly caffeinated. This has been ${bunch.replace('-', ' ').toUpperCase()} Daily. We'll be back tomorrow with more news, more takes, and probably more coffee. Peace out!\n\n`;
+  } else {
+    script += `${currentHosts.main}: Und das war eure tägliche Dosis ${bunch.replace('-', ' ')} Wahnsinn! Noch ein letzter Weisheitsspruch, ${currentHosts.expert.split(' ')[1]}?\n\n`;
+    script += `${currentHosts.expert}: Denkt daran: In einer Welt voller heißer Takes und Breaking News ist manchmal das Klügste, abzuwarten. Aber wo bleibt da der Spaß?\n\n`;
+    script += `${currentHosts.main}: Gesprochen wie eine wahre Expertin, die heimlich das Chaos liebt! Das war's für heute. Bleibt neugierig, bleibt skeptisch und trinkt genug Kaffee. Das war ${bunch.replace('-', ' ').toUpperCase()} Daily. Bis morgen!\n\n`;
+  }
   
   return script;
 }
@@ -166,7 +420,7 @@ function generateDialogueScript(articles, bunch, language) {
 // Main function handler
 export const handler = async (event, context) => {
   try {
-    console.log('Starting automated podcast generation...');
+    console.log('Starting enhanced podcast generation...');
     
     // Get today's date
     const today = new Date().toISOString().split('T')[0];
@@ -261,8 +515,9 @@ async function generateEpisode(bunch, language, sources, date) {
       }
     }
     
-    // Take top 3 articles
-    const topArticles = allArticles.slice(0, 3);
+    // Sort by score and take top 3-5 articles
+    const sortedArticles = allArticles.sort((a, b) => b.score - a.score);
+    const topArticles = sortedArticles.slice(0, Math.min(5, Math.max(3, sortedArticles.length)));
     
     if (topArticles.length === 0) {
       console.log(`No articles found for ${bunch}-${language}`);
@@ -271,23 +526,28 @@ async function generateEpisode(bunch, language, sources, date) {
         bunch,
         language,
         date,
-        title: `${bunch.toUpperCase()} Daily - ${date}`,
+        title: `${bunch.replace('-', ' ').toUpperCase()} Daily - ${date}`,
         description: 'No new articles available today.',
         script: 'No content available for today. Please try again later.',
         duration: '0:30',
-        articles: []
+        articles: [],
+        engagementLevel: 'LOW'
       };
     }
     
-    console.log(`Found ${topArticles.length} articles for ${bunch}-${language}`);
+    console.log(`Found ${topArticles.length} high-scoring articles for ${bunch}-${language}`);
     
-    // Generate dialogue script
-    const script = generateDialogueScript(topArticles, bunch, language);
+    // Generate enhanced dialogue script
+    const script = generateEnhancedDialogueScript(topArticles, bunch, language);
     
     // Calculate estimated duration (average speaking rate: 150 words/minute)
     const wordCount = script.split(' ').length;
     const estimatedMinutes = Math.ceil(wordCount / 150);
     const duration = `${estimatedMinutes}:00`;
+    
+    // Determine engagement level based on article scores
+    const avgScore = topArticles.reduce((sum, a) => sum + a.score, 0) / topArticles.length;
+    const engagementLevel = avgScore > 10 ? 'VERY HIGH' : avgScore > 7 ? 'HIGH' : avgScore > 4 ? 'MEDIUM' : 'LOW';
     
     // Create episode object
     const episode = {
@@ -295,16 +555,24 @@ async function generateEpisode(bunch, language, sources, date) {
       bunch,
       language,
       date,
-      title: `${bunch.replace('-', ' ').toUpperCase()} Daily - ${new Date(date).toLocaleDateString()}`,
-      description: `Today's top ${bunch.replace('-', ' ')} stories: ${topArticles.map(a => a.title).join(', ')}`,
+      title: `${bunch.replace('-', ' ').toUpperCase()} Daily - ${new Date(date).toLocaleDateString()} 🔥`,
+      description: `Today's hottest ${bunch.replace('-', ' ')} stories with spicy commentary: ${topArticles.slice(0, 3).map(a => a.title.split(' ').slice(0, 5).join(' ')).join(' | ')}...`,
       script,
       duration,
-      articles: topArticles,
+      articles: topArticles.map(a => ({
+        title: a.title,
+        description: a.description,
+        link: a.link,
+        source: a.source,
+        score: a.score
+      })),
       audioUrl: null, // Will be generated later with TTS
-      rssUrl: `https://podcast.arnavray.ca/${bunch}/${language}/rss.xml`
+      rssUrl: `https://podcast.arnavray.ca/${bunch}/${language}/rss.xml`,
+      engagementLevel,
+      totalScore: topArticles.reduce((sum, a) => sum + a.score, 0)
     };
     
-    console.log(`Generated episode: ${episode.title}`);
+    console.log(`Generated episode: ${episode.title} (Engagement: ${engagementLevel})`);
     return episode;
     
   } catch (error) {
@@ -319,7 +587,8 @@ async function generateEpisode(bunch, language, sources, date) {
       script: 'Error occurred during generation. Please try again later.',
       duration: '0:30',
       articles: [],
-      error: error.message
+      error: error.message,
+      engagementLevel: 'ERROR'
     };
   }
 }
