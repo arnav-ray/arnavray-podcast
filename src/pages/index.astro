@@ -1,0 +1,154 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const title = 'Daily Automated Podcasts';
+---
+
+<Layout title={title}>
+  <main>
+    <header class="hero">
+      <h1>🎧 Daily Automated Podcasts</h1>
+      <p>AI-generated daily content in English & German</p>
+      <p>5 Categories: AI & Tech • Business • Science • Health • Politics</p>
+    </header>
+
+    <section class="demo">
+      <h2>🎯 Try It Now - Live Demo</h2>
+      <p>Click below to generate today's podcast episode:</p>
+      
+      <div class="demo-controls">
+        <button id="generate-demo" class="generate-button">
+          🎬 Generate AI & Tech Episode (English)
+        </button>
+        <div id="loading" class="loading" style="display: none;">
+          ⏳ Generating podcast... This may take 30 seconds.
+        </div>
+      </div>
+      
+      <div id="episodes-container">
+        <!-- Episodes will be loaded here -->
+      </div>
+    </section>
+
+    <section class="info">
+      <h2>✨ How It Works</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 2rem 0;">
+        <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <h3>🤖 Fully Automated</h3>
+          <p>Daily generation from RSS feeds with no manual intervention</p>
+        </div>
+        <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <h3>🎭 Dialogue Format</h3>
+          <p>Professional host-expert conversations, not just text reading</p>
+        </div>
+        <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <h3>🌍 Multi-Language</h3>
+          <p>Content in both English and German from native sources</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<script>
+  // Demo functionality
+  document.getElementById('generate-demo')?.addEventListener('click', async () => {
+    const button = document.getElementById('generate-demo');
+    const loading = document.getElementById('loading');
+    const container = document.getElementById('episodes-container');
+    
+    // Show loading
+    button.style.display = 'none';
+    loading.style.display = 'block';
+    container.innerHTML = '';
+    
+    try {
+      // Call your Netlify function
+      const response = await fetch('/.netlify/functions/generate-podcast?bunch=ai-tech&lang=en');
+      const data = await response.json();
+      
+      if (data.success && data.episodes && data.episodes.length > 0) {
+        // Display the episode
+        const episode = data.episodes[0];
+        
+        container.innerHTML = `
+          <div class="episode">
+            <h3>📺 ${episode.title}</h3>
+            <p><strong>Description:</strong> ${episode.description}</p>
+            <p><strong>Duration:</strong> ~${episode.duration}</p>
+            <button class="play-episode-btn" onclick="playEpisode(\`${episode.script.replace(/`/g, '\\`').replace(/\\/g, '\\\\')}\`)">
+              ▶️ Play Episode (Text-to-Speech)
+            </button>
+            <details class="transcript">
+              <summary>📝 View Full Transcript</summary>
+              <div class="transcript-content">${episode.script}</div>
+            </details>
+            <p style="font-size: 0.9rem; color: #6b7280; margin-top: 1rem;">
+              <strong>Sources:</strong> 
+              ${episode.articles.map(article => 
+                `<a href="${article.link}" target="_blank" style="color: #3b82f6;">${article.source}</a>`
+              ).join(', ')}
+            </p>
+          </div>
+        `;
+        
+      } else {
+        container.innerHTML = '<div class="error">❌ Failed to generate episode. Please try again.</div>';
+      }
+      
+    } catch (error) {
+      console.error('Error:', error);
+      container.innerHTML = '<div class="error">❌ Network error. Please check your connection and try again.</div>';
+    }
+    
+    // Hide loading
+    loading.style.display = 'none';
+    button.style.display = 'inline-block';
+  });
+
+  // Global function for playing episodes
+  window.playEpisode = function(script) {
+    // Stop any current speech
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+    
+    // Create new speech
+    const utterance = new SpeechSynthesisUtterance(script);
+    utterance.rate = 0.9; // Slightly slower for clarity
+    utterance.pitch = 1.0; // Normal pitch
+    utterance.volume = 1.0; // Full volume
+    
+    // Try to find a good voice
+    const voices = speechSynthesis.getVoices();
+    const preferredVoice = voices.find(voice => 
+      voice.lang.includes('en') && voice.name.includes('Google')
+    ) || voices.find(voice => voice.lang.includes('en'));
+    
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
+    
+    // Start speaking
+    speechSynthesis.speak(utterance);
+    
+    // Update button text
+    const button = event.target;
+    const originalText = button.textContent;
+    button.textContent = '🔊 Playing...';
+    
+    utterance.onend = () => {
+      button.textContent = originalText;
+    };
+    
+    utterance.onerror = () => {
+      button.textContent = originalText;
+      alert('Sorry, there was an error playing the audio.');
+    };
+  };
+
+  // Load voices when available
+  speechSynthesis.onvoiceschanged = function() {
+    console.log('Voices loaded:', speechSynthesis.getVoices().length);
+  };
+</script>
