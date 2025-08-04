@@ -1,28 +1,65 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
-const title = 'Daily Automated Podcasts';
+const title = 'Daily Automated Podcasts - 5 Premium Categories';
 ---
 
 <Layout title={title}>
   <main>
     <header class="hero">
-      <h1>🎧 Daily Automated Podcasts</h1>
-      <p>AI-generated daily content in English & German</p>
-      <p>5 Categories: AI & Tech • Business • Science • Health • Politics</p>
+      <h1>🎧 Premium Daily Podcasts</h1>
+      <p>AI-generated content with hot takes, humor & insider insights</p>
+      <p>5 Categories • English & German • Unfiltered Commentary</p>
     </header>
 
-    <section class="demo">
-      <h2>🎯 Try It Now - Live Demo</h2>
-      <p>Click below to generate today's podcast episode:</p>
-      
-      <div class="demo-controls">
-        <button id="generate-demo" class="generate-button">
-          🎬 Generate AI & Tech Episode (English)
-        </button>
-        <div id="loading" class="loading" style="display: none;">
-          ⏳ Generating podcast... This may take 30 seconds.
+    <section class="bunches-grid">
+      <h2>🔥 Choose Your Category</h2>
+      <div class="categories">
+        <div class="category-card" data-bunch="ai-tech">
+          <div class="category-icon">🤖</div>
+          <h3>AI & Tech</h3>
+          <p>Cutting-edge tech, AI breakthroughs, startup drama</p>
+          <button class="generate-btn" data-bunch="ai-tech" data-lang="en">Generate EN</button>
+          <button class="generate-btn" data-bunch="ai-tech" data-lang="de">Generate DE</button>
         </div>
+        
+        <div class="category-card" data-bunch="finance-business">
+          <div class="category-icon">💰</div>
+          <h3>Finance & Business</h3>
+          <p>Market moves, IPOs, mergers, financial scandals</p>
+          <button class="generate-btn" data-bunch="finance-business" data-lang="en">Generate EN</button>
+          <button class="generate-btn" data-bunch="finance-business" data-lang="de">Generate DE</button>
+        </div>
+        
+        <div class="category-card" data-bunch="leadership-strategy">
+          <div class="category-icon">🎯</div>
+          <h3>Leadership & Strategy</h3>
+          <p>CEO insights, management trends, strategic thinking</p>
+          <button class="generate-btn" data-bunch="leadership-strategy" data-lang="en">Generate EN</button>
+          <button class="generate-btn" data-bunch="leadership-strategy" data-lang="de">Generate DE</button>
+        </div>
+        
+        <div class="category-card" data-bunch="science-innovation">
+          <div class="category-icon">🔬</div>
+          <h3>Science & Innovation</h3>
+          <p>Research breakthroughs, scientific discoveries</p>
+          <button class="generate-btn" data-bunch="science-innovation" data-lang="en">Generate EN</button>
+          <button class="generate-btn" data-bunch="science-innovation" data-lang="de">Generate DE</button>
+        </div>
+        
+        <div class="category-card" data-bunch="sunday-specials">
+          <div class="category-icon">🎭</div>
+          <h3>Sunday Specials</h3>
+          <p>Lifestyle, humor, culture, weekend vibes</p>
+          <button class="generate-btn" data-bunch="sunday-specials" data-lang="en">Generate EN</button>
+          <button class="generate-btn" data-bunch="sunday-specials" data-lang="de">Generate DE</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo">
+      <div id="loading" class="loading" style="display: none;">
+        ⏳ Generating spicy podcast... This may take 30 seconds.
       </div>
       
       <div id="episodes-container">
@@ -30,20 +67,24 @@ const title = 'Daily Automated Podcasts';
       </div>
     </section>
 
-    <section class="info">
-      <h2>✨ How It Works</h2>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 2rem 0;">
-        <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-          <h3>🤖 Fully Automated</h3>
-          <p>Daily generation from RSS feeds with no manual intervention</p>
+    <section class="features">
+      <h2>✨ What Makes This Different</h2>
+      <div class="features-grid">
+        <div class="feature">
+          <h3>🔥 Hot Takes & Humor</h3>
+          <p>No corporate BS - real opinions and witty commentary</p>
         </div>
-        <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-          <h3>🎭 Dialogue Format</h3>
-          <p>Professional host-expert conversations, not just text reading</p>
+        <div class="feature">
+          <h3>🎭 Dynamic Voices</h3>
+          <p>Different voices for host vs expert with personality</p>
         </div>
-        <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-          <h3>🌍 Multi-Language</h3>
-          <p>Content in both English and German from native sources</p>
+        <div class="feature">
+          <h3>🎯 Trending Content</h3>
+          <p>AI-powered selection of the most engaging stories</p>
+        </div>
+        <div class="feature">
+          <h3>⚡ Multiple Languages</h3>
+          <p>Native English and German content from local sources</p>
         </div>
       </div>
     </section>
@@ -51,150 +92,643 @@ const title = 'Daily Automated Podcasts';
 </Layout>
 
 <script>
-  // Demo functionality
-  document.addEventListener('DOMContentLoaded', () => {
-    const generateButton = document.getElementById('generate-demo');
-    
-    if (generateButton) {
-      generateButton.addEventListener('click', async () => {
-        const button = document.getElementById('generate-demo');
-        const loading = document.getElementById('loading');
-        const container = document.getElementById('episodes-container');
-        
-        // Show loading
-        button.style.display = 'none';
-        loading.style.display = 'block';
-        container.innerHTML = '';
-        
-        try {
-          // Call your Netlify function
-          const response = await fetch('/.netlify/functions/generate-podcast?bunch=ai-tech&lang=en');
-          const data = await response.json();
-          
-          if (data.success && data.episodes && data.episodes.length > 0) {
-            // Display the episode
-            const episode = data.episodes[0];
-            
-            container.innerHTML = `
-              <div class="episode">
-                <h3>📺 ${episode.title}</h3>
-                <p><strong>Description:</strong> ${episode.description}</p>
-                <p><strong>Duration:</strong> ~${episode.duration}</p>
-                <button class="play-episode-btn" id="play-btn" data-script="${episode.script.replace(/"/g, '&quot;')}">
-                  ▶️ Play Episode (Text-to-Speech)
-                </button>
-                <button class="play-episode-btn" id="stop-btn" style="display: none; background: #ef4444;">
-                  ⏹️ Stop
-                </button>
-                <details class="transcript">
-                  <summary>📝 View Full Transcript</summary>
-                  <div class="transcript-content">${episode.script.replace(/\n\n/g, '<br><br>')}</div>
-                </details>
-                <p style="font-size: 0.9rem; color: #6b7280; margin-top: 1rem;">
-                  <strong>Sources:</strong> 
-                  ${episode.articles.map(article => 
-                    `<a href="${article.link}" target="_blank" style="color: #3b82f6;">${article.source}</a>`
-                  ).join(', ')}
-                </p>
-              </div>
-            `;
-            
-            // Add TTS functionality
-            setupTextToSpeech();
-            
-          } else {
-            container.innerHTML = '<div class="error">❌ Failed to generate episode. Please try again.</div>';
-          }
-          
-        } catch (error) {
-          console.error('Error:', error);
-          container.innerHTML = '<div class="error">❌ Network error. Please check your connection and try again.</div>';
-        }
-        
-        // Hide loading
-        loading.style.display = 'none';
-        button.style.display = 'inline-block';
-      });
+  // Voice configuration for different speakers
+  const VOICE_CONFIG = {
+    host: {
+      en: { 
+        rate: 0.9, 
+        pitch: 1.1, 
+        volume: 1.0,
+        preferredNames: ['Google UK English Female', 'Microsoft Zira', 'Alex', 'Samantha'],
+        fallbackLang: 'en-US'
+      },
+      de: { 
+        rate: 0.85, 
+        pitch: 1.0, 
+        volume: 1.0,
+        preferredNames: ['Google Deutsch Female', 'Microsoft Hedda', 'Anna'],
+        fallbackLang: 'de-DE'
+      }
+    },
+    expert: {
+      en: { 
+        rate: 0.8, 
+        pitch: 0.9, 
+        volume: 0.95,
+        preferredNames: ['Google UK English Male', 'Microsoft David', 'Daniel', 'Fred'],
+        fallbackLang: 'en-GB'
+      },
+      de: { 
+        rate: 0.8, 
+        pitch: 0.85, 
+        volume: 0.95,
+        preferredNames: ['Google Deutsch Male', 'Microsoft Stefan', 'Markus'],
+        fallbackLang: 'de-DE'
+      }
     }
+  };
+
+  let currentSpeechQueue = [];
+  let isPlaying = false;
+
+  // Initialize when page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    loadVoices();
+    speechSynthesis.addEventListener('voiceschanged', loadVoices);
+    setupCategoryButtons();
   });
 
-  // Text-to-Speech setup function
-  function setupTextToSpeech() {
-    const playBtn = document.getElementById('play-btn');
-    const stopBtn = document.getElementById('stop-btn');
-    let currentSpeech = null;
+  function loadVoices() {
+    const voices = speechSynthesis.getVoices();
+    console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+  }
+
+  function setupCategoryButtons() {
+    const generateButtons = document.querySelectorAll('.generate-btn');
     
-    if (playBtn) {
-      playBtn.addEventListener('click', () => {
-        const script = playBtn.getAttribute('data-script');
+    generateButtons.forEach(button => {
+      button.addEventListener('click', async (e) => {
+        const bunch = e.target.getAttribute('data-bunch');
+        const lang = e.target.getAttribute('data-lang');
+        
+        await generatePodcast(bunch, lang);
+      });
+    });
+  }
+
+  async function generatePodcast(bunch, language) {
+    const loading = document.getElementById('loading');
+    const container = document.getElementById('episodes-container');
+    
+    // Show loading
+    loading.style.display = 'block';
+    container.innerHTML = '';
+    
+    // Disable all buttons
+    document.querySelectorAll('.generate-btn').forEach(btn => {
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+    });
+    
+    try {
+      const response = await fetch(`/.netlify/functions/generate-podcast?bunch=${bunch}&lang=${language}`);
+      const data = await response.json();
+      
+      if (data.success && data.episodes && data.episodes.length > 0) {
+        const episode = data.episodes[0];
+        
+        container.innerHTML = `
+          <div class="episode">
+            <div class="episode-header">
+              <div class="episode-badges">
+                <span class="bunch-badge">${episode.bunch.replace('-', ' ').toUpperCase()}</span>
+                <span class="lang-badge">${episode.language.toUpperCase()}</span>
+                <span class="spicy-badge">🔥 SPICY</span>
+              </div>
+              <h3>📺 ${episode.title}</h3>
+              <p class="episode-description">${episode.description}</p>
+              <p class="episode-meta"><strong>Duration:</strong> ~${episode.duration} • <strong>Engagement Level:</strong> ${episode.engagementLevel || 'HIGH'}</p>
+            </div>
+            
+            <div class="audio-controls">
+              <button class="play-btn dialogue-btn" data-script="${episode.script.replace(/"/g, '&quot;')}" data-language="${episode.language}">
+                🎭 Play Dialogue (Enhanced Voices)
+              </button>
+              <button class="play-btn simple-btn" data-script="${episode.script.replace(/"/g, '&quot;')}">
+                ▶️ Play Simple (Single Voice)
+              </button>
+              <button class="stop-btn" style="display: none;">
+                ⏹️ Stop
+              </button>
+            </div>
+            
+            <div class="voice-info">
+              <strong>🎙️ Voice Setup:</strong>
+              <div id="voice-status">Loading voices...</div>
+            </div>
+            
+            <details class="transcript">
+              <summary>📝 View Full Transcript</summary>
+              <div class="transcript-content">${episode.script.replace(/\n\n/g, '<br><br>')}</div>
+            </details>
+            
+            <div class="sources">
+              <strong>📰 Sources:</strong> 
+              ${episode.articles.map(article => 
+                `<a href="${article.link}" target="_blank">${article.source}</a>`
+              ).join(' • ')}
+            </div>
+          </div>
+        `;
+        
+        setupEnhancedTextToSpeech();
+        updateVoiceStatus();
+        
+      } else {
+        container.innerHTML = `
+          <div class="error">
+            ❌ Failed to generate ${bunch} episode in ${language.toUpperCase()}. 
+            This might be due to RSS feed issues. Please try again in a few minutes.
+          </div>
+        `;
+      }
+      
+    } catch (error) {
+      console.error('Error:', error);
+      container.innerHTML = `
+        <div class="error">
+          ❌ Network error generating ${bunch} episode. Please check your connection and try again.
+        </div>
+      `;
+    }
+    
+    // Hide loading and re-enable buttons
+    loading.style.display = 'none';
+    document.querySelectorAll('.generate-btn').forEach(btn => {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    });
+  }
+
+  function findBestVoice(speakerType, language) {
+    const voices = speechSynthesis.getVoices();
+    const config = VOICE_CONFIG[speakerType][language];
+    
+    if (!config) return null;
+    
+    // Try preferred voices first
+    for (const preferredName of config.preferredNames) {
+      const voice = voices.find(v => v.name.includes(preferredName));
+      if (voice) {
+        console.log(`Found preferred voice for ${speakerType}: ${voice.name}`);
+        return voice;
+      }
+    }
+    
+    // Fallback to language match
+    const fallbackVoice = voices.find(v => v.lang.startsWith(config.fallbackLang.split('-')[0]));
+    if (fallbackVoice) {
+      console.log(`Using fallback voice for ${speakerType}: ${fallbackVoice.name}`);
+      return fallbackVoice;
+    }
+    
+    return voices[0] || null;
+  }
+
+  function createSpeechUtterance(text, speakerType, language) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    const config = VOICE_CONFIG[speakerType][language];
+    const voice = findBestVoice(speakerType, language);
+    
+    if (voice) {
+      utterance.voice = voice;
+    }
+    
+    if (config) {
+      utterance.rate = config.rate;
+      utterance.pitch = config.pitch;
+      utterance.volume = config.volume;
+    }
+    
+    return utterance;
+  }
+
+  function parseDialogue(script) {
+    const lines = script.split('\n\n').filter(line => line.trim());
+    const dialogueParts = [];
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      if (trimmedLine.includes(':')) {
+        const [speaker, ...textParts] = trimmedLine.split(':');
+        const text = textParts.join(':').trim();
+        
+        if (text) {
+          const speakerName = speaker.trim().toLowerCase();
+          const speakerType = speakerName.includes('alex') || speakerName.includes('michael') ? 'host' : 'expert';
+          
+          dialogueParts.push({
+            speaker: speakerName,
+            text: text,
+            type: speakerType
+          });
+        }
+      }
+    }
+    
+    return dialogueParts;
+  }
+
+  async function playDialogue(script, language) {
+    if (isPlaying) {
+      speechSynthesis.cancel();
+      isPlaying = false;
+    }
+    
+    const dialogueParts = parseDialogue(script);
+    console.log('Dialogue parts:', dialogueParts);
+    
+    if (dialogueParts.length === 0) {
+      alert('Could not parse dialogue. Playing as single voice.');
+      playSimpleVoice(script);
+      return;
+    }
+    
+    isPlaying = true;
+    
+    for (let i = 0; i < dialogueParts.length; i++) {
+      const part = dialogueParts[i];
+      const utterance = createSpeechUtterance(part.text, part.type, language);
+      
+      // Add pause between speakers
+      if (i > 0) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
+      if (!isPlaying) break;
+      
+      await new Promise((resolve) => {
+        utterance.onend = resolve;
+        utterance.onerror = (error) => {
+          console.error('Speech error:', error);
+          resolve();
+        };
+        
+        speechSynthesis.speak(utterance);
+      });
+    }
+    
+    isPlaying = false;
+    resetPlayButtons();
+  }
+
+  function playSimpleVoice(script) {
+    if (speechSynthesis.speaking) {
+      speechSynthesis.cancel();
+    }
+    
+    const utterance = new SpeechSynthesisUtterance(script);
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    
+    const voices = speechSynthesis.getVoices();
+    const englishVoice = voices.find(voice => 
+      voice.lang.startsWith('en') && voice.name.includes('Google')
+    ) || voices.find(voice => voice.lang.startsWith('en'));
+    
+    if (englishVoice) {
+      utterance.voice = englishVoice;
+    }
+    
+    utterance.onend = resetPlayButtons;
+    utterance.onerror = (error) => {
+      console.error('Speech error:', error);
+      resetPlayButtons();
+    };
+    
+    speechSynthesis.speak(utterance);
+  }
+
+  function resetPlayButtons() {
+    const dialogueBtn = document.querySelector('.dialogue-btn');
+    const simpleBtn = document.querySelector('.simple-btn');
+    const stopBtn = document.querySelector('.stop-btn');
+    
+    if (dialogueBtn) dialogueBtn.style.display = 'inline-block';
+    if (simpleBtn) simpleBtn.style.display = 'inline-block';
+    if (stopBtn) stopBtn.style.display = 'none';
+    
+    isPlaying = false;
+  }
+
+  function setupEnhancedTextToSpeech() {
+    const dialogueBtn = document.querySelector('.dialogue-btn');
+    const simpleBtn = document.querySelector('.simple-btn');
+    const stopBtn = document.querySelector('.stop-btn');
+    
+    if (dialogueBtn) {
+      dialogueBtn.addEventListener('click', async () => {
+        const script = dialogueBtn.getAttribute('data-script');
+        const language = dialogueBtn.getAttribute('data-language') || 'en';
         
         if (!script) {
           alert('No script available to play.');
           return;
         }
         
-        // Stop any current speech
-        if (speechSynthesis.speaking) {
-          speechSynthesis.cancel();
+        dialogueBtn.style.display = 'none';
+        simpleBtn.style.display = 'none';
+        stopBtn.style.display = 'inline-block';
+        
+        await playDialogue(script, language);
+      });
+    }
+    
+    if (simpleBtn) {
+      simpleBtn.addEventListener('click', () => {
+        const script = dialogueBtn.getAttribute('data-script');
+        
+        if (!script) {
+          alert('No script available to play.');
+          return;
         }
         
-        // Create new speech
-        currentSpeech = new SpeechSynthesisUtterance(script);
+        dialogueBtn.style.display = 'none';
+        simpleBtn.style.display = 'none';
+        stopBtn.style.display = 'inline-block';
         
-        // Configure speech settings
-        currentSpeech.rate = 0.8; // Slower for clarity
-        currentSpeech.pitch = 1.0; // Normal pitch
-        currentSpeech.volume = 1.0; // Full volume
-        
-        // Try to find a good English voice
-        const voices = speechSynthesis.getVoices();
-        const englishVoice = voices.find(voice => 
-          voice.lang.startsWith('en') && (voice.name.includes('Google') || voice.name.includes('Microsoft'))
-        ) || voices.find(voice => voice.lang.startsWith('en'));
-        
-        if (englishVoice) {
-          currentSpeech.voice = englishVoice;
-          console.log('Using voice:', englishVoice.name);
-        }
-        
-        // Event handlers
-        currentSpeech.onstart = () => {
-          playBtn.style.display = 'none';
-          stopBtn.style.display = 'inline-block';
-          console.log('Speech started');
-        };
-        
-        currentSpeech.onend = () => {
-          playBtn.style.display = 'inline-block';
-          stopBtn.style.display = 'none';
-          currentSpeech = null;
-          console.log('Speech ended');
-        };
-        
-        currentSpeech.onerror = (error) => {
-          console.error('Speech error:', error);
-          playBtn.style.display = 'inline-block';
-          stopBtn.style.display = 'none';
-          alert('Sorry, there was an error with text-to-speech. Try refreshing the page.');
-        };
-        
-        // Start speaking
-        speechSynthesis.speak(currentSpeech);
+        playSimpleVoice(script);
       });
     }
     
     if (stopBtn) {
       stopBtn.addEventListener('click', () => {
         speechSynthesis.cancel();
-        playBtn.style.display = 'inline-block';
-        stopBtn.style.display = 'none';
-        currentSpeech = null;
+        isPlaying = false;
+        resetPlayButtons();
       });
     }
   }
 
-  // Load voices when available (some browsers need this)
-  speechSynthesis.addEventListener('voiceschanged', () => {
-    console.log('Voices loaded:', speechSynthesis.getVoices().length);
-  });
+  function updateVoiceStatus() {
+    const statusDiv = document.getElementById('voice-status');
+    if (!statusDiv) return;
+    
+    const voices = speechSynthesis.getVoices();
+    const hostVoice = findBestVoice('host', 'en');
+    const expertVoice = findBestVoice('expert', 'en');
+    
+    statusDiv.innerHTML = `
+      📢 Host: ${hostVoice ? hostVoice.name : 'Default'} • 
+      🎓 Expert: ${expertVoice ? expertVoice.name : 'Default'} • 
+      🔢 Total Voices: ${voices.length}
+    `;
+  }
 </script>
+
+<style>
+  .categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+  }
+  
+  .category-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 2px solid transparent;
+  }
+  
+  .category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-color: #3b82f6;
+  }
+  
+  .category-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  
+  .category-card h3 {
+    color: #1f2937;
+    margin: 0 0 1rem 0;
+    font-size: 1.3rem;
+  }
+  
+  .category-card p {
+    color: #6b7280;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+  }
+  
+  .generate-btn {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 0.25rem;
+    transition: all 0.2s ease;
+  }
+  
+  .generate-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    transform: translateY(-1px);
+  }
+  
+  .generate-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .episode {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin: 2rem 0;
+    border-left: 4px solid #f59e0b;
+  }
+  
+  .episode-badges {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .bunch-badge, .lang-badge, .spicy-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  
+  .bunch-badge {
+    background: #3b82f6;
+    color: white;
+  }
+  
+  .lang-badge {
+    background: #10b981;
+    color: white;
+  }
+  
+  .spicy-badge {
+    background: #f59e0b;
+    color: white;
+  }
+  
+  .episode-header h3 {
+    color: #1f2937;
+    margin: 0 0 1rem 0;
+    font-size: 1.4rem;
+  }
+  
+  .episode-description {
+    color: #4b5563;
+    line-height: 1.6;
+    margin: 0 0 1rem 0;
+  }
+  
+  .episode-meta {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin: 0 0 1.5rem 0;
+  }
+  
+  .audio-controls {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin: 1.5rem 0;
+    text-align: center;
+  }
+  
+  .play-btn, .stop-btn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 0.25rem;
+    transition: background 0.2s ease;
+  }
+  
+  .play-btn:hover {
+    background: #2563eb;
+  }
+  
+  .stop-btn {
+    background: #ef4444;
+  }
+  
+  .stop-btn:hover {
+    background: #dc2626;
+  }
+  
+  .voice-info {
+    background: #f0f9ff;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    border: 1px solid #e0f2fe;
+  }
+  
+  .transcript {
+    margin: 1.5rem 0;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1.5rem;
+  }
+  
+  .transcript summary {
+    color: #3b82f6;
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0.5rem 0;
+  }
+  
+  .transcript-content {
+    background: #f9fafb;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    line-height: 1.7;
+    border-left: 4px solid #3b82f6;
+  }
+  
+  .sources {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+  
+  .sources a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .sources a:hover {
+    text-decoration: underline;
+  }
+  
+  .loading {
+    text-align: center;
+    color: #3b82f6;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 2rem 0;
+    padding: 2rem;
+    background: #f0f9ff;
+    border-radius: 12px;
+    border: 2px dashed #3b82f6;
+  }
+  
+  .error {
+    background: #fef2f2;
+    color: #ef4444;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #fecaca;
+    margin: 2rem 0;
+    text-align: center;
+  }
+  
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+  }
+  
+  .feature {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .feature h3 {
+    color: #1f2937;
+    margin: 0 0 1rem 0;
+  }
+  
+  .feature p {
+    color: #6b7280;
+    line-height: 1.5;
+    margin: 0;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .categories {
+      grid-template-columns: 1fr;
+    }
+    
+    .episode {
+      padding: 1rem;
+    }
+    
+    .generate-btn {
+      display: block;
+      width: 100%;
+      margin: 0.25rem 0;
+    }
+  }
+</style>
