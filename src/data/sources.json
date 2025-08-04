@@ -1,84 +1,213 @@
 {
   "bunches": {
     "ai-tech": {
-      "en": [
-        "https://techcrunch.com/feed/",
-        "https://feeds.arstechnica.com/arstechnica/index",
-        "https://www.theverge.com/rss/index.xml",
-        "https://www.wired.com/feed/rss"
-      ],
-      "de": [
-        "https://www.heise.de/rss/heise-atom.xml",
-        "https://rss.golem.de/rss.php?feed=ATOM1.0",
-        "https://www.computerbild.de/rss/tests.xml"
-      ]
-    },
-    "business": {
-      "en": [
-        "https://feeds.bloomberg.com/technology/news.rss",
-        "https://www.reuters.com/technology/feed/",
-        "https://feeds.fortune.com/fortune/technology"
-      ],
-      "de": [
-        "https://www.handelsblatt.com/contentexport/feed/technik",
-        "https://www.manager-magazin.de/rss/ressort-unternehmen.xml"
-      ]
-    },
-    "science": {
-      "en": [
-        "https://www.sciencedaily.com/rss/computers_math.xml",
-        "https://feeds.nature.com/nature/rss/current",
-        "https://www.newscientist.com/feed/home/"
-      ],
-      "de": [
-        "https://www.spektrum.de/alias/rss/spektrum-de-rss-feed/996406",
-        "https://www.wissenschaft.de/rss_feeds/"
-      ]
-    },
-    "health": {
-      "en": [
-        "https://www.medicalnewstoday.com/rss",
-        "https://feeds.webmd.com/rss/rss.aspx?RSSSource=RSS_PUBLIC",
-        "https://www.healthline.com/rss"
-      ],
-      "de": [
-        "https://www.apotheken-umschau.de/rss/",
-        "https://www.netdoktor.de/rss/"
-      ]
-    },
-    "politics": {
-      "en": [
-        "https://feeds.reuters.com/reuters/politicsNews",
-        "https://www.politico.com/rss/politicopicks.xml",
-        "https://feeds.bbci.co.uk/news/politics/rss.xml"
-      ],
-      "de": [
-        "https://www.tagesschau.de/xml/rss2/",
-        "https://www.zeit.de/politik/index",
-        "https://www.spiegel.de/politik/index.rss"
-      ]
-    }
-  },
-  "settings": {
-    "maxArticlesPerBunch": 3,
-    "podcastDuration": "3-5 minutes",
-    "updateTime": "06:00 UTC",
-    "languages": {
+      "name": "AI & Tech",
+      "description": "Cutting-edge technology, AI breakthroughs, and startup drama",
+      "icon": "🤖",
       "en": {
-        "name": "English",
-        "voice": "en-US",
+        "sources": [
+          "https://techcrunch.com/feed/",
+          "https://feeds.arstechnica.com/arstechnica/index",
+          "https://www.theverge.com/rss/index.xml",
+          "https://www.wired.com/feed/rss",
+          "https://venturebeat.com/feed/",
+          "https://thenextweb.com/feed/",
+          "https://feeds.feedburner.com/TheHackersNews"
+        ],
         "hosts": {
-          "main": "Alex",
-          "expert": "Dr. Sarah"
+          "main": "Alex Rivera",
+          "expert": "Dr. Sarah Chen"
         }
       },
       "de": {
-        "name": "German", 
-        "voice": "de-DE",
+        "sources": [
+          "https://www.heise.de/rss/heise-atom.xml",
+          "https://rss.golem.de/rss.php?feed=ATOM1.0",
+          "https://www.computerbild.de/rss/tests.xml",
+          "https://t3n.de/rss.xml",
+          "https://www.chip.de/rss/rss_overblick.xml"
+        ],
         "hosts": {
-          "main": "Michael",
-          "expert": "Dr. Schmidt"
+          "main": "Michael Brenner",
+          "expert": "Dr. Lisa Schmidt"
         }
+      }
+    },
+    "finance-business": {
+      "name": "Finance & Business",
+      "description": "Market moves, IPOs, mergers, and financial scandals",
+      "icon": "💰",
+      "en": {
+        "sources": [
+          "https://feeds.bloomberg.com/markets/news.rss",
+          "https://feeds.reuters.com/reuters/businessNews",
+          "https://feeds.fortune.com/fortune/finance",
+          "https://www.cnbc.com/id/10001147/device/rss/rss.html",
+          "https://feeds.wsj.com/wsj/xml/rss/3_7085.xml",
+          "https://feeds.ft.com/rss/home"
+        ],
+        "hosts": {
+          "main": "Alex Rivera",
+          "expert": "Dr. Marcus Sterling"
+        }
+      },
+      "de": {
+        "sources": [
+          "https://www.handelsblatt.com/contentexport/feed/top-themen",
+          "https://www.manager-magazin.de/rss",
+          "https://www.wiwo.de/contentexport/feed/rss/schlagzeilen",
+          "https://www.capital.de/feed/rss",
+          "https://www.finance-magazin.de/feed/"
+        ],
+        "hosts": {
+          "main": "Michael Brenner",
+          "expert": "Dr. Klaus Weber"
+        }
+      }
+    },
+    "leadership-strategy": {
+      "name": "Leadership & Strategic Thinking",
+      "description": "CEO insights, management trends, and strategic planning",
+      "icon": "🎯",
+      "en": {
+        "sources": [
+          "https://hbr.org/feed",
+          "https://feeds.feedburner.com/fastcompany/headlines",
+          "https://feeds.inc.com/home/updates",
+          "https://www.mckinsey.com/insights/rss",
+          "https://knowledge.wharton.upenn.edu/feed/",
+          "https://sloanreview.mit.edu/feed/"
+        ],
+        "hosts": {
+          "main": "Alex Rivera",
+          "expert": "Dr. Victoria Hamilton"
+        }
+      },
+      "de": {
+        "sources": [
+          "https://www.manager-magazin.de/rss/ressort-unternehmen.xml",
+          "https://www.capital.de/karriere/feed/rss",
+          "https://www.impulse.de/feed.rss",
+          "https://www.brandeins.de/rss.xml"
+        ],
+        "hosts": {
+          "main": "Michael Brenner",
+          "expert": "Dr. Anna Richter"
+        }
+      }
+    },
+    "science-innovation": {
+      "name": "Science Research & Innovation",
+      "description": "Research breakthroughs and scientific discoveries",
+      "icon": "🔬",
+      "en": {
+        "sources": [
+          "https://www.sciencedaily.com/rss/computers_math.xml",
+          "https://feeds.nature.com/nature/rss/current",
+          "https://www.newscientist.com/feed/home/",
+          "https://phys.org/rss-feed/",
+          "https://feeds.sciencemag.org/rss/news_current.xml",
+          "https://feeds.popsci.com/c/34567/f/632419/index.rss"
+        ],
+        "hosts": {
+          "main": "Alex Rivera",
+          "expert": "Dr. Emma Watson"
+        }
+      },
+      "de": {
+        "sources": [
+          "https://www.spektrum.de/alias/rss/spektrum-de-rss-feed/996406",
+          "https://www.wissenschaft.de/feed/",
+          "https://www.scinexx.de/feed/",
+          "https://www.forschung-und-lehre.de/rss",
+          "https://www.laborpraxis.vogel.de/rss/news.xml"
+        ],
+        "hosts": {
+          "main": "Michael Brenner",
+          "expert": "Dr. Stefan Mueller"
+        }
+      }
+    },
+    "sunday-specials": {
+      "name": "Sunday Specials",
+      "description": "Lifestyle, humor, culture, and weekend vibes",
+      "icon": "🎭",
+      "en": {
+        "sources": [
+          "https://lifehacker.com/rss",
+          "https://www.vox.com/rss/index.xml",
+          "https://feeds.mashable.com/Mashable",
+          "https://www.buzzfeed.com/world.xml",
+          "https://www.mentalfloss.com/feed",
+          "https://feeds.howstuffworks.com/DailyStuffPodcast"
+        ],
+        "hosts": {
+          "main": "Alex Rivera",
+          "expert": "Jordan Blake"
+        }
+      },
+      "de": {
+        "sources": [
+          "https://www.stern.de/feed/alle-nachrichten/",
+          "https://rss.sueddeutsche.de/rss/Panorama",
+          "https://www.welt.de/feeds/section/vermischtes.rss",
+          "https://www.bento.de/rss/feed.rss",
+          "https://www.jetzt.de/rss"
+        ],
+        "hosts": {
+          "main": "Michael Brenner",
+          "expert": "Julia Hoffmann"
+        }
+      }
+    }
+  },
+  "settings": {
+    "maxArticlesPerBunch": 5,
+    "minArticlesForEpisode": 3,
+    "podcastDuration": "5-8 minutes",
+    "updateTime": "06:00 UTC",
+    "scoreThresholds": {
+      "veryHigh": 10,
+      "high": 7,
+      "medium": 4,
+      "low": 0
+    },
+    "languages": {
+      "en": {
+        "name": "English",
+        "flag": "🇬🇧",
+        "voice": "en-GB",
+        "style": "witty and energetic"
+      },
+      "de": {
+        "name": "German", 
+        "flag": "🇩🇪",
+        "voice": "de-DE",
+        "style": "scharfsinnig und dynamisch"
+      }
+    },
+    "voiceModulation": {
+      "host": {
+        "rate": {
+          "min": 0.95,
+          "max": 1.1
+        },
+        "pitch": {
+          "min": 1.1,
+          "max": 1.3
+        },
+        "pauseAfter": 300
+      },
+      "expert": {
+        "rate": {
+          "min": 0.8,
+          "max": 0.9
+        },
+        "pitch": {
+          "min": 0.7,
+          "max": 0.9
+        },
+        "pauseAfter": 400
       }
     }
   }
