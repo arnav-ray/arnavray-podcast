@@ -4,16 +4,82 @@
       "en": [
         "https://techcrunch.com/feed/",
         "https://feeds.arstechnica.com/arstechnica/index",
-        "https://www.theverge.com/rss/index.xml"
+        "https://www.theverge.com/rss/index.xml",
+        "https://www.wired.com/feed/rss"
       ],
       "de": [
         "https://www.heise.de/rss/heise-atom.xml",
-        "https://rss.golem.de/rss.php?feed=ATOM1.0"
+        "https://rss.golem.de/rss.php?feed=ATOM1.0",
+        "https://www.computerbild.de/rss/tests.xml"
       ]
     },
     "business": {
-      "en": ["https://feeds.reuters.com/reuters/businessNews"],
-      "de": ["https://www.handelsblatt.com/contentexport/feed/technik"]
+      "en": [
+        "https://feeds.bloomberg.com/technology/news.rss",
+        "https://www.reuters.com/technology/feed/",
+        "https://feeds.fortune.com/fortune/technology"
+      ],
+      "de": [
+        "https://www.handelsblatt.com/contentexport/feed/technik",
+        "https://www.manager-magazin.de/rss/ressort-unternehmen.xml"
+      ]
+    },
+    "science": {
+      "en": [
+        "https://www.sciencedaily.com/rss/computers_math.xml",
+        "https://feeds.nature.com/nature/rss/current",
+        "https://www.newscientist.com/feed/home/"
+      ],
+      "de": [
+        "https://www.spektrum.de/alias/rss/spektrum-de-rss-feed/996406",
+        "https://www.wissenschaft.de/rss_feeds/"
+      ]
+    },
+    "health": {
+      "en": [
+        "https://www.medicalnewstoday.com/rss",
+        "https://feeds.webmd.com/rss/rss.aspx?RSSSource=RSS_PUBLIC",
+        "https://www.healthline.com/rss"
+      ],
+      "de": [
+        "https://www.apotheken-umschau.de/rss/",
+        "https://www.netdoktor.de/rss/"
+      ]
+    },
+    "politics": {
+      "en": [
+        "https://feeds.reuters.com/reuters/politicsNews",
+        "https://www.politico.com/rss/politicopicks.xml",
+        "https://feeds.bbci.co.uk/news/politics/rss.xml"
+      ],
+      "de": [
+        "https://www.tagesschau.de/xml/rss2/",
+        "https://www.zeit.de/politik/index",
+        "https://www.spiegel.de/politik/index.rss"
+      ]
+    }
+  },
+  "settings": {
+    "maxArticlesPerBunch": 3,
+    "podcastDuration": "3-5 minutes",
+    "updateTime": "06:00 UTC",
+    "languages": {
+      "en": {
+        "name": "English",
+        "voice": "en-US",
+        "hosts": {
+          "main": "Alex",
+          "expert": "Dr. Sarah"
+        }
+      },
+      "de": {
+        "name": "German", 
+        "voice": "de-DE",
+        "hosts": {
+          "main": "Michael",
+          "expert": "Dr. Schmidt"
+        }
+      }
     }
   }
 }
