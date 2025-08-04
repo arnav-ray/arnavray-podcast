@@ -52,103 +52,149 @@ const title = 'Daily Automated Podcasts';
 
 <script>
   // Demo functionality
-  document.getElementById('generate-demo')?.addEventListener('click', async () => {
-    const button = document.getElementById('generate-demo');
-    const loading = document.getElementById('loading');
-    const container = document.getElementById('episodes-container');
+  document.addEventListener('DOMContentLoaded', () => {
+    const generateButton = document.getElementById('generate-demo');
     
-    // Show loading
-    button.style.display = 'none';
-    loading.style.display = 'block';
-    container.innerHTML = '';
-    
-    try {
-      // Call your Netlify function
-      const response = await fetch('/.netlify/functions/generate-podcast?bunch=ai-tech&lang=en');
-      const data = await response.json();
-      
-      if (data.success && data.episodes && data.episodes.length > 0) {
-        // Display the episode
-        const episode = data.episodes[0];
+    if (generateButton) {
+      generateButton.addEventListener('click', async () => {
+        const button = document.getElementById('generate-demo');
+        const loading = document.getElementById('loading');
+        const container = document.getElementById('episodes-container');
         
-        container.innerHTML = `
-          <div class="episode">
-            <h3>📺 ${episode.title}</h3>
-            <p><strong>Description:</strong> ${episode.description}</p>
-            <p><strong>Duration:</strong> ~${episode.duration}</p>
-            <button class="play-episode-btn" onclick="playEpisode(\`${episode.script.replace(/`/g, '\\`').replace(/\\/g, '\\\\')}\`)">
-              ▶️ Play Episode (Text-to-Speech)
-            </button>
-            <details class="transcript">
-              <summary>📝 View Full Transcript</summary>
-              <div class="transcript-content">${episode.script}</div>
-            </details>
-            <p style="font-size: 0.9rem; color: #6b7280; margin-top: 1rem;">
-              <strong>Sources:</strong> 
-              ${episode.articles.map(article => 
-                `<a href="${article.link}" target="_blank" style="color: #3b82f6;">${article.source}</a>`
-              ).join(', ')}
-            </p>
-          </div>
-        `;
+        // Show loading
+        button.style.display = 'none';
+        loading.style.display = 'block';
+        container.innerHTML = '';
         
-      } else {
-        container.innerHTML = '<div class="error">❌ Failed to generate episode. Please try again.</div>';
-      }
-      
-    } catch (error) {
-      console.error('Error:', error);
-      container.innerHTML = '<div class="error">❌ Network error. Please check your connection and try again.</div>';
+        try {
+          // Call your Netlify function
+          const response = await fetch('/.netlify/functions/generate-podcast?bunch=ai-tech&lang=en');
+          const data = await response.json();
+          
+          if (data.success && data.episodes && data.episodes.length > 0) {
+            // Display the episode
+            const episode = data.episodes[0];
+            
+            container.innerHTML = `
+              <div class="episode">
+                <h3>📺 ${episode.title}</h3>
+                <p><strong>Description:</strong> ${episode.description}</p>
+                <p><strong>Duration:</strong> ~${episode.duration}</p>
+                <button class="play-episode-btn" id="play-btn" data-script="${episode.script.replace(/"/g, '&quot;')}">
+                  ▶️ Play Episode (Text-to-Speech)
+                </button>
+                <button class="play-episode-btn" id="stop-btn" style="display: none; background: #ef4444;">
+                  ⏹️ Stop
+                </button>
+                <details class="transcript">
+                  <summary>📝 View Full Transcript</summary>
+                  <div class="transcript-content">${episode.script.replace(/\n\n/g, '<br><br>')}</div>
+                </details>
+                <p style="font-size: 0.9rem; color: #6b7280; margin-top: 1rem;">
+                  <strong>Sources:</strong> 
+                  ${episode.articles.map(article => 
+                    `<a href="${article.link}" target="_blank" style="color: #3b82f6;">${article.source}</a>`
+                  ).join(', ')}
+                </p>
+              </div>
+            `;
+            
+            // Add TTS functionality
+            setupTextToSpeech();
+            
+          } else {
+            container.innerHTML = '<div class="error">❌ Failed to generate episode. Please try again.</div>';
+          }
+          
+        } catch (error) {
+          console.error('Error:', error);
+          container.innerHTML = '<div class="error">❌ Network error. Please check your connection and try again.</div>';
+        }
+        
+        // Hide loading
+        loading.style.display = 'none';
+        button.style.display = 'inline-block';
+      });
     }
-    
-    // Hide loading
-    loading.style.display = 'none';
-    button.style.display = 'inline-block';
   });
 
-  // Global function for playing episodes
-  window.playEpisode = function(script) {
-    // Stop any current speech
-    if (window.speechSynthesis.speaking) {
-      window.speechSynthesis.cancel();
+  // Text-to-Speech setup function
+  function setupTextToSpeech() {
+    const playBtn = document.getElementById('play-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    let currentSpeech = null;
+    
+    if (playBtn) {
+      playBtn.addEventListener('click', () => {
+        const script = playBtn.getAttribute('data-script');
+        
+        if (!script) {
+          alert('No script available to play.');
+          return;
+        }
+        
+        // Stop any current speech
+        if (speechSynthesis.speaking) {
+          speechSynthesis.cancel();
+        }
+        
+        // Create new speech
+        currentSpeech = new SpeechSynthesisUtterance(script);
+        
+        // Configure speech settings
+        currentSpeech.rate = 0.8; // Slower for clarity
+        currentSpeech.pitch = 1.0; // Normal pitch
+        currentSpeech.volume = 1.0; // Full volume
+        
+        // Try to find a good English voice
+        const voices = speechSynthesis.getVoices();
+        const englishVoice = voices.find(voice => 
+          voice.lang.startsWith('en') && (voice.name.includes('Google') || voice.name.includes('Microsoft'))
+        ) || voices.find(voice => voice.lang.startsWith('en'));
+        
+        if (englishVoice) {
+          currentSpeech.voice = englishVoice;
+          console.log('Using voice:', englishVoice.name);
+        }
+        
+        // Event handlers
+        currentSpeech.onstart = () => {
+          playBtn.style.display = 'none';
+          stopBtn.style.display = 'inline-block';
+          console.log('Speech started');
+        };
+        
+        currentSpeech.onend = () => {
+          playBtn.style.display = 'inline-block';
+          stopBtn.style.display = 'none';
+          currentSpeech = null;
+          console.log('Speech ended');
+        };
+        
+        currentSpeech.onerror = (error) => {
+          console.error('Speech error:', error);
+          playBtn.style.display = 'inline-block';
+          stopBtn.style.display = 'none';
+          alert('Sorry, there was an error with text-to-speech. Try refreshing the page.');
+        };
+        
+        // Start speaking
+        speechSynthesis.speak(currentSpeech);
+      });
     }
     
-    // Create new speech
-    const utterance = new SpeechSynthesisUtterance(script);
-    utterance.rate = 0.9; // Slightly slower for clarity
-    utterance.pitch = 1.0; // Normal pitch
-    utterance.volume = 1.0; // Full volume
-    
-    // Try to find a good voice
-    const voices = speechSynthesis.getVoices();
-    const preferredVoice = voices.find(voice => 
-      voice.lang.includes('en') && voice.name.includes('Google')
-    ) || voices.find(voice => voice.lang.includes('en'));
-    
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
+    if (stopBtn) {
+      stopBtn.addEventListener('click', () => {
+        speechSynthesis.cancel();
+        playBtn.style.display = 'inline-block';
+        stopBtn.style.display = 'none';
+        currentSpeech = null;
+      });
     }
-    
-    // Start speaking
-    speechSynthesis.speak(utterance);
-    
-    // Update button text
-    const button = event.target;
-    const originalText = button.textContent;
-    button.textContent = '🔊 Playing...';
-    
-    utterance.onend = () => {
-      button.textContent = originalText;
-    };
-    
-    utterance.onerror = () => {
-      button.textContent = originalText;
-      alert('Sorry, there was an error playing the audio.');
-    };
-  };
+  }
 
-  // Load voices when available
-  speechSynthesis.onvoiceschanged = function() {
+  // Load voices when available (some browsers need this)
+  speechSynthesis.addEventListener('voiceschanged', () => {
     console.log('Voices loaded:', speechSynthesis.getVoices().length);
-  };
+  });
 </script>
