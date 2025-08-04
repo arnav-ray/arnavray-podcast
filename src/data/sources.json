@@ -1,0 +1,19 @@
+{
+  "bunches": {
+    "ai-tech": {
+      "en": [
+        "https://techcrunch.com/feed/",
+        "https://feeds.arstechnica.com/arstechnica/index",
+        "https://www.theverge.com/rss/index.xml"
+      ],
+      "de": [
+        "https://www.heise.de/rss/heise-atom.xml",
+        "https://rss.golem.de/rss.php?feed=ATOM1.0"
+      ]
+    },
+    "business": {
+      "en": ["https://feeds.reuters.com/reuters/businessNews"],
+      "de": ["https://www.handelsblatt.com/contentexport/feed/technik"]
+    }
+  }
+}
