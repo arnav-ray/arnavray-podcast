@@ -1,0 +1,342 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const title = 'Podcast Archive - All Episodes';
+---
+
+<Layout title={title}>
+  <main>
+    <header class="archive-header">
+      <h1>📚 Podcast Archive</h1>
+      <a href="/" class="back-link">← Back to Home</a>
+    </header>
+
+    <div class="filters">
+      <div class="filter-group">
+        <label>Category:</label>
+        <select id="categoryFilter">
+          <option value="all">All Categories</option>
+          <option value="ai-tech">AI & Tech</option>
+          <option value="finance-business">Finance & Business</option>
+          <option value="leadership-strategy">Leadership & Strategy</option>
+          <option value="science-innovation">Science & Innovation</option>
+          <option value="sunday-specials">Sunday Specials</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label>Language:</label>
+        <select id="languageFilter">
+          <option value="all">All Languages</option>
+          <option value="en">English</option>
+          <option value="de">German</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label>Date Range:</label>
+        <select id="dateFilter">
+          <option value="all">All Time</option>
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month">This Month</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="archiveGrid" class="archive-grid">
+      <!-- Episodes will be loaded here -->
+    </div>
+  </main>
+</Layout>
+
+<script>
+  let allEpisodes = [];
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadArchive();
+    setupFilters();
+  });
+
+  function loadArchive() {
+    const saved = localStorage.getItem('episodeHistory');
+    if (saved) {
+      const episodeHistory = JSON.parse(saved);
+      allEpisodes = [];
+      
+      Object.values(episodeHistory).forEach(episodes => {
+        allEpisodes.push(...episodes);
+      });
+      
+      // Sort by date descending
+      allEpisodes.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      displayEpisodes(allEpisodes);
+    } else {
+      document.getElementById('archiveGrid').innerHTML = 
+        '<p class="no-episodes">No episodes found. Start generating episodes from the home page!</p>';
+    }
+  }
+
+  function setupFilters() {
+    document.getElementById('categoryFilter').addEventListener('change', filterEpisodes);
+    document.getElementById('languageFilter').addEventListener('change', filterEpisodes);
+    document.getElementById('dateFilter').addEventListener('change', filterEpisodes);
+  }
+
+  function filterEpisodes() {
+    const category = document.getElementById('categoryFilter').value;
+    const language = document.getElementById('languageFilter').value;
+    const dateRange = document.getElementById('dateFilter').value;
+    
+    let filtered = allEpisodes;
+    
+    // Category filter
+    if (category !== 'all') {
+      filtered = filtered.filter(ep => ep.bunch === category);
+    }
+    
+    // Language filter
+    if (language !== 'all') {
+      filtered = filtered.filter(ep => ep.language === language);
+    }
+    
+    // Date filter
+    if (dateRange !== 'all') {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      filtered = filtered.filter(ep => {
+        const epDate = new Date(ep.date);
+        
+        switch (dateRange) {
+          case 'today':
+            return epDate >= today;
+          case 'week':
+            const weekAgo = new Date(today);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            return epDate >= weekAgo;
+          case 'month':
+            const monthAgo = new Date(today);
+            monthAgo.setMonth(monthAgo.getMonth() - 1);
+            return epDate >= monthAgo;
+          default:
+            return true;
+        }
+      });
+    }
+    
+    displayEpisodes(filtered);
+  }
+
+  function displayEpisodes(episodes) {
+    const grid = document.getElementById('archiveGrid');
+    
+    if (episodes.length === 0) {
+      grid.innerHTML = '<p class="no-episodes">No episodes match your filters.</p>';
+      return;
+    }
+    
+    // Group by date
+    const grouped = {};
+    episodes.forEach(ep => {
+      const date = new Date(ep.date).toLocaleDateString();
+      if (!grouped[date]) {
+        grouped[date] = [];
+      }
+      grouped[date].push(ep);
+    });
+    
+    let html = '';
+    Object.entries(grouped).forEach(([date, eps]) => {
+      html += `
+        <div class="date-group">
+          <h3 class="date-header">${date}</h3>
+          <div class="episodes-list">
+            ${eps.map(ep => `
+              <div class="archive-episode" onclick='window.parent.showEpisodeModal(${JSON.stringify(ep).replace(/'/g, '&apos;')})'>
+                <div class="episode-info">
+                  <h4>${ep.title}</h4>
+                  <p>${ep.description}</p>
+                </div>
+                <div class="episode-tags">
+                  <span class="tag category-tag">${ep.bunch.replace('-', ' ')}</span>
+                  <span class="tag lang-tag">${ep.language.toUpperCase()}</span>
+                  <span class="tag duration-tag">${ep.duration}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    });
+    
+    grid.innerHTML = html;
+  }
+</script>
+
+<style>
+  .archive-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .archive-header h1 {
+    font-size: 2.5rem;
+  }
+  
+  .back-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--primary);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  .back-link:hover {
+    background: var(--primary);
+    color: white;
+  }
+  
+  .filters {
+    background: var(--surface);
+    padding: 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .filter-group label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+  
+  .filter-group select {
+    background: var(--background);
+    color: var(--text);
+    border: 2px solid var(--border);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    min-width: 150px;
+  }
+  
+  .archive-grid {
+    margin-top: 2rem;
+  }
+  
+  .date-group {
+    margin-bottom: 2rem;
+  }
+  
+  .date-header {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+  }
+  
+  .episodes-list {
+    display: grid;
+    gap: 1rem;
+  }
+  
+  .archive-episode {
+    background: var(--surface);
+    padding: 1.5rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .archive-episode:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+  
+  .episode-info h4 {
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+  
+  .episode-info p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+  
+  .episode-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+  
+  .tag {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  
+  .category-tag {
+    background: var(--primary);
+    color: white;
+  }
+  
+  .lang-tag {
+    background: var(--secondary);
+    color: white;
+  }
+  
+  .duration-tag {
+    background: var(--background);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+  
+  .no-episodes {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 4rem;
+    font-size: 1.1rem;
+  }
+  
+  @media (max-width: 768px) {
+    .archive-header {
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+    }
+    
+    .filters {
+      flex-direction: column;
+    }
+    
+    .archive-episode {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .episode-tags {
+      margin-top: 1rem;
+    }
+  }
+</style>
