@@ -30,100 +30,68 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
           <div class="category-header">
             <div class="category-icon">🤖</div>
             <h3>AI & Tech</h3>
-          </div>
-          <p>Cutting-edge tech, AI breakthroughs, startup drama</p>
-          <div class="recent-episodes" id="ai-tech-episodes">
-            <div class="loading-placeholder">Loading episodes...</div>
+            <p>Cutting-edge tech, AI breakthroughs, startup drama</p>
           </div>
           <button class="generate-btn" data-bunch="ai-tech">Generate Today's Episode</button>
+          <div class="episodes-container" id="ai-tech-episodes">
+            <!-- Episodes will be loaded here -->
+          </div>
         </div>
         
         <div class="category-card" data-bunch="finance-business">
           <div class="category-header">
             <div class="category-icon">💰</div>
             <h3>Finance & Business</h3>
-          </div>
-          <p>Market moves, IPOs, mergers, financial scandals</p>
-          <div class="recent-episodes" id="finance-business-episodes">
-            <div class="loading-placeholder">Loading episodes...</div>
+            <p>Market moves, IPOs, mergers, financial scandals</p>
           </div>
           <button class="generate-btn" data-bunch="finance-business">Generate Today's Episode</button>
+          <div class="episodes-container" id="finance-business-episodes">
+            <!-- Episodes will be loaded here -->
+          </div>
         </div>
         
         <div class="category-card" data-bunch="leadership-strategy">
           <div class="category-header">
             <div class="category-icon">🎯</div>
             <h3>Leadership & Strategy</h3>
-          </div>
-          <p>CEO insights, management trends, strategic thinking</p>
-          <div class="recent-episodes" id="leadership-strategy-episodes">
-            <div class="loading-placeholder">Loading episodes...</div>
+            <p>CEO insights, management trends, strategic thinking</p>
           </div>
           <button class="generate-btn" data-bunch="leadership-strategy">Generate Today's Episode</button>
+          <div class="episodes-container" id="leadership-strategy-episodes">
+            <!-- Episodes will be loaded here -->
+          </div>
         </div>
         
         <div class="category-card" data-bunch="science-innovation">
           <div class="category-header">
             <div class="category-icon">🔬</div>
             <h3>Science & Innovation</h3>
-          </div>
-          <p>Research breakthroughs, scientific discoveries</p>
-          <div class="recent-episodes" id="science-innovation-episodes">
-            <div class="loading-placeholder">Loading episodes...</div>
+            <p>Research breakthroughs, scientific discoveries</p>
           </div>
           <button class="generate-btn" data-bunch="science-innovation">Generate Today's Episode</button>
+          <div class="episodes-container" id="science-innovation-episodes">
+            <!-- Episodes will be loaded here -->
+          </div>
         </div>
         
         <div class="category-card" data-bunch="sunday-specials">
           <div class="category-header">
             <div class="category-icon">🎭</div>
             <h3>Sunday Specials</h3>
-          </div>
-          <p>Lifestyle, humor, culture, weekend vibes</p>
-          <div class="recent-episodes" id="sunday-specials-episodes">
-            <div class="loading-placeholder">Loading episodes...</div>
+            <p>Lifestyle, humor, culture, weekend vibes</p>
           </div>
           <button class="generate-btn" data-bunch="sunday-specials">Generate Today's Episode</button>
+          <div class="episodes-container" id="sunday-specials-episodes">
+            <!-- Episodes will be loaded here -->
+          </div>
         </div>
       </div>
     </section>
-
-    <section class="history-section">
-      <h2>📅 Episode Archive</h2>
-      <div class="history-controls">
-        <select id="historyFilter">
-          <option value="all">All Episodes</option>
-          <option value="ai-tech">AI & Tech</option>
-          <option value="finance-business">Finance & Business</option>
-          <option value="leadership-strategy">Leadership & Strategy</option>
-          <option value="science-innovation">Science & Innovation</option>
-          <option value="sunday-specials">Sunday Specials</option>
-        </select>
-        <select id="languageFilter">
-          <option value="all">All Languages</option>
-          <option value="en">English</option>
-          <option value="de">German</option>
-        </select>
-      </div>
-      <div id="historyGrid" class="history-grid">
-        <!-- Episodes will be loaded here -->
-      </div>
-    </section>
   </main>
-
-  <!-- Episode Modal -->
-  <div id="episodeModal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <div id="modalContent">
-        <!-- Episode details will be loaded here -->
-      </div>
-    </div>
-  </div>
 </Layout>
 
 <script>
-  // Voice configurations for proper language support
+  // Voice configurations
   const VOICE_CONFIG = {
     en: {
       host: { 
@@ -154,6 +122,7 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
   let currentLanguage = 'en';
   let episodeHistory = {};
   let isPlaying = false;
+  let currentPlayingId = null;
 
   // Initialize
   document.addEventListener('DOMContentLoaded', () => {
@@ -165,9 +134,9 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
   });
 
   function initializeTheme() {
-    const theme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', theme);
-    updateThemeToggle(theme);
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeToggle(savedTheme);
   }
 
   function initializeLanguage() {
@@ -185,7 +154,7 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
   function setupEventListeners() {
     // Theme toggle
     document.getElementById('themeToggle').addEventListener('click', () => {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', newTheme);
       localStorage.setItem('theme', newTheme);
@@ -207,39 +176,20 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
         await generateEpisode(bunch);
       });
     });
-
-    // Modal close
-    document.querySelector('.close').addEventListener('click', () => {
-      closeModal();
-    });
-
-    // History filters
-    document.getElementById('historyFilter').addEventListener('change', filterHistory);
-    document.getElementById('languageFilter').addEventListener('change', filterHistory);
   }
 
   function updateLanguageUI() {
-    // Update button texts based on language
     document.querySelectorAll('.generate-btn').forEach(btn => {
       btn.textContent = currentLanguage === 'de' ? 
         'Heutige Folge generieren' : 
         "Generate Today's Episode";
     });
-
-    // Update section titles
-    const historyTitle = document.querySelector('.history-section h2');
-    if (historyTitle) {
-      historyTitle.textContent = currentLanguage === 'de' ? 
-        '📅 Episodenarchiv' : 
-        '📅 Episode Archive';
-    }
   }
 
   async function generateEpisode(bunch) {
     const btn = document.querySelector(`[data-bunch="${bunch}"] .generate-btn`);
-    const episodesContainer = document.getElementById(`${bunch}-episodes`);
+    const container = document.getElementById(`${bunch}-episodes`);
     
-    // Show loading state
     btn.disabled = true;
     btn.textContent = currentLanguage === 'de' ? 'Generiere...' : 'Generating...';
     
@@ -248,14 +198,8 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
       const data = await response.json();
       
       if (data.success && data.episode) {
-        // Store episode
         storeEpisode(data.episode);
-        
-        // Show episode in the card
-        displayEpisodeInCard(data.episode, episodesContainer);
-        
-        // Open modal with episode
-        showEpisodeModal(data.episode);
+        displayEpisodesInContainer(bunch);
       } else {
         alert(data.error || 'Failed to generate episode');
       }
@@ -274,16 +218,10 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
       episodeHistory[key] = [];
     }
     
-    // Remove existing episode for today if any
     episodeHistory[key] = episodeHistory[key].filter(ep => ep.date !== episode.date);
-    
-    // Add new episode at the beginning
     episodeHistory[key].unshift(episode);
+    episodeHistory[key] = episodeHistory[key].slice(0, 30);
     
-    // Keep only last 7 episodes per category
-    episodeHistory[key] = episodeHistory[key].slice(0, 7);
-    
-    // Save to localStorage
     localStorage.setItem('episodeHistory', JSON.stringify(episodeHistory));
   }
 
@@ -293,108 +231,70 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
       episodeHistory = JSON.parse(saved);
     }
     
-    // Display episodes in cards
-    Object.keys(episodeHistory).forEach(key => {
-      const [bunch, lang] = key.split('-');
-      if (lang === currentLanguage) {
-        const episodes = episodeHistory[key] || [];
-        const container = document.getElementById(`${bunch}-episodes`);
-        if (container && episodes.length > 0) {
-          displayEpisodesInCard(episodes.slice(0, 3), container);
-        }
-      }
+    // Display episodes for each category
+    ['ai-tech', 'finance-business', 'leadership-strategy', 'science-innovation', 'sunday-specials'].forEach(bunch => {
+      displayEpisodesInContainer(bunch);
     });
+  }
+
+  function displayEpisodesInContainer(bunch) {
+    const container = document.getElementById(`${bunch}-episodes`);
+    const key = `${bunch}-${currentLanguage}`;
+    const episodes = episodeHistory[key] || [];
     
-    // Update history grid
-    updateHistoryGrid();
-  }
-
-  function displayEpisodesInCard(episodes, container) {
-    container.innerHTML = episodes.map(ep => `
-      <div class="episode-item" onclick="showEpisodeModal(${JSON.stringify(ep).replace(/"/g, '&quot;')})">
-        <div class="episode-date">${new Date(ep.date).toLocaleDateString()}</div>
-        <div class="episode-title">${ep.title}</div>
-      </div>
-    `).join('');
-  }
-
-  function displayEpisodeInCard(episode, container) {
-    const existingEpisodes = episodeHistory[`${episode.bunch}-${episode.language}`] || [];
-    displayEpisodesInCard(existingEpisodes.slice(0, 3), container);
-  }
-
-  function showEpisodeModal(episode) {
-    const modal = document.getElementById('episodeModal');
-    const modalContent = document.getElementById('modalContent');
+    if (episodes.length === 0) {
+      container.innerHTML = `<div class="no-episodes">${currentLanguage === 'de' ? 'Noch keine Folgen' : 'No episodes yet'}</div>`;
+      return;
+    }
     
-    modalContent.innerHTML = `
-      <div class="episode-modal-header">
-        <h2>${episode.title}</h2>
+    container.innerHTML = episodes.map((episode, index) => `
+      <div class="episode ${index === 0 ? 'latest-episode' : ''}" id="episode-${episode.id}">
+        <div class="episode-header">
+          <h4>${episode.title}</h4>
+          <span class="episode-date">${new Date(episode.date).toLocaleDateString()}</span>
+        </div>
+        
         <div class="episode-meta">
-          <span class="episode-badge">${episode.bunch.replace('-', ' ').toUpperCase()}</span>
-          <span class="episode-badge">${episode.language.toUpperCase()}</span>
-          <span class="episode-duration">~${episode.duration}</span>
+          <span class="meta-item">📱 ${episode.language.toUpperCase()}</span>
+          <span class="meta-item">⏱️ ${episode.duration}</span>
+          <span class="meta-item">📊 Score: ${episode.totalScore}</span>
+        </div>
+        
+        <div class="episode-controls">
+          <button class="play-btn" onclick="playEpisode('${episode.id}', \`${episode.script.replace(/`/g, '\\`').replace(/"/g, '&quot;')}\`, '${episode.language}')">
+            ▶️ ${currentLanguage === 'de' ? 'Abspielen' : 'Play'}
+          </button>
+          <button class="stop-btn" onclick="stopEpisode('${episode.id}')" style="display: none;">
+            ⏹️ Stop
+          </button>
+          <button class="transcript-btn" onclick="toggleTranscript('${episode.id}')">
+            📝 ${currentLanguage === 'de' ? 'Transkript' : 'Transcript'}
+          </button>
+        </div>
+        
+        <div class="transcript" id="transcript-${episode.id}" style="display: none;">
+          <h5>${currentLanguage === 'de' ? 'Transkript:' : 'Transcript:'}</h5>
+          <div class="transcript-content">${formatTranscript(episode.script)}</div>
+        </div>
+        
+        <div class="articles">
+          <h5>${currentLanguage === 'de' ? '📰 Verwendete Artikel:' : '📰 Articles Used:'}</h5>
+          <ul class="articles-list">
+            ${episode.articles.map(article => `
+              <li>
+                <a href="${article.link}" target="_blank" rel="noopener noreferrer">
+                  ${article.title}
+                </a>
+                <span class="article-meta">
+                  <span class="source">${article.source}</span>
+                  <span class="score">Score: ${article.score}</span>
+                </span>
+              </li>
+            `).join('')}
+          </ul>
         </div>
       </div>
-      
-      <div class="episode-description">
-        <p>${episode.description}</p>
-      </div>
-      
-      <div class="audio-controls">
-        <button class="play-btn" id="playBtn" data-script="${episode.script.replace(/"/g, '&quot;')}" data-language="${episode.language}">
-          ▶️ ${currentLanguage === 'de' ? 'Abspielen' : 'Play Episode'}
-        </button>
-        <button class="stop-btn" id="stopBtn" style="display: none;">
-          ⏹️ Stop
-        </button>
-      </div>
-      
-      <div class="voice-info">
-        <strong>${currentLanguage === 'de' ? 'Sprecher:' : 'Hosts:'}</strong>
-        ${episode.hosts.main} & ${episode.hosts.expert}
-      </div>
-      
-      <details class="transcript">
-        <summary>${currentLanguage === 'de' ? '📝 Transkript anzeigen' : '📝 View Transcript'}</summary>
-        <div class="transcript-content">${formatTranscript(episode.script)}</div>
-      </details>
-      
-      <div class="articles-section">
-        <h3>${currentLanguage === 'de' ? '📰 Verwendete Artikel' : '📰 Articles Used'}</h3>
-        <ul class="articles-list">
-          ${episode.articles.map(article => `
-            <li>
-              <a href="${article.link}" target="_blank">${article.title}</a>
-              <span class="article-meta">${article.source} • Score: ${article.score}</span>
-            </li>
-          `).join('')}
-        </ul>
-      </div>
-    `;
-    
-    // Setup audio controls
-    setupAudioControls();
-    
-    modal.style.display = 'block';
-  }
-
-  function closeModal() {
-    const modal = document.getElementById('episodeModal');
-    modal.style.display = 'none';
-    
-    // Stop any playing audio
-    if (speechSynthesis.speaking) {
-      speechSynthesis.cancel();
-      isPlaying = false;
-    }
-  }
-
-  window.onclick = function(event) {
-    const modal = document.getElementById('episodeModal');
-    if (event.target === modal) {
-      closeModal();
-    }
+    `).join('');
   }
 
   function formatTranscript(script) {
@@ -415,62 +315,30 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
       .join('');
   }
 
-  function setupAudioControls() {
-    const playBtn = document.getElementById('playBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    
-    if (playBtn) {
-      playBtn.addEventListener('click', () => {
-        const script = playBtn.getAttribute('data-script');
-        const language = playBtn.getAttribute('data-language');
-        playEpisode(script, language);
-        playBtn.style.display = 'none';
-        stopBtn.style.display = 'inline-block';
-      });
-    }
-    
-    if (stopBtn) {
-      stopBtn.addEventListener('click', () => {
-        stopPlayback();
-        playBtn.style.display = 'inline-block';
-        stopBtn.style.display = 'none';
-      });
-    }
+  function toggleTranscript(episodeId) {
+    const transcript = document.getElementById(`transcript-${episodeId}`);
+    transcript.style.display = transcript.style.display === 'none' ? 'block' : 'none';
   }
 
-  function loadVoices() {
-    if ('speechSynthesis' in window) {
-      speechSynthesis.getVoices();
-      speechSynthesis.addEventListener('voiceschanged', () => {
-        const voices = speechSynthesis.getVoices();
-        console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
-      });
-    }
-  }
-
-  function findBestVoice(speakerType, language) {
-    const voices = speechSynthesis.getVoices();
-    const config = VOICE_CONFIG[language][speakerType];
-    
-    // Try preferred voices
-    for (const preferred of config.preferredVoices) {
-      const voice = voices.find(v => v.name.includes(preferred));
-      if (voice) return voice;
+  window.playEpisode = async function(episodeId, script, language) {
+    // Stop any currently playing episode
+    if (currentPlayingId && currentPlayingId !== episodeId) {
+      stopEpisode(currentPlayingId);
     }
     
-    // Fallback to language match
-    const langCode = language === 'de' ? 'de-DE' : 'en-GB';
-    return voices.find(v => v.lang === langCode) || voices[0];
-  }
-
-  async function playEpisode(script, language) {
-    if (isPlaying) return;
+    const playBtn = document.querySelector(`#episode-${episodeId} .play-btn`);
+    const stopBtn = document.querySelector(`#episode-${episodeId} .stop-btn`);
     
+    playBtn.style.display = 'none';
+    stopBtn.style.display = 'inline-block';
+    
+    currentPlayingId = episodeId;
     isPlaying = true;
+    
     const dialogueParts = parseDialogue(script);
     
     for (const part of dialogueParts) {
-      if (!isPlaying) break;
+      if (!isPlaying || currentPlayingId !== episodeId) break;
       
       const utterance = new SpeechSynthesisUtterance(part.text);
       const config = VOICE_CONFIG[language][part.type];
@@ -488,15 +356,52 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
         speechSynthesis.speak(utterance);
       });
       
-      // Pause between speakers
-      if (isPlaying) {
+      if (isPlaying && currentPlayingId === episodeId) {
         await new Promise(resolve => setTimeout(resolve, 300));
       }
     }
     
+    if (currentPlayingId === episodeId) {
+      stopEpisode(episodeId);
+    }
+  };
+
+  window.stopEpisode = function(episodeId) {
+    speechSynthesis.cancel();
     isPlaying = false;
-    document.getElementById('playBtn').style.display = 'inline-block';
-    document.getElementById('stopBtn').style.display = 'none';
+    
+    const playBtn = document.querySelector(`#episode-${episodeId} .play-btn`);
+    const stopBtn = document.querySelector(`#episode-${episodeId} .stop-btn`);
+    
+    if (playBtn) playBtn.style.display = 'inline-block';
+    if (stopBtn) stopBtn.style.display = 'none';
+    
+    if (currentPlayingId === episodeId) {
+      currentPlayingId = null;
+    }
+  };
+
+  function loadVoices() {
+    if ('speechSynthesis' in window) {
+      speechSynthesis.getVoices();
+      speechSynthesis.addEventListener('voiceschanged', () => {
+        const voices = speechSynthesis.getVoices();
+        console.log('Available voices:', voices.length);
+      });
+    }
+  }
+
+  function findBestVoice(speakerType, language) {
+    const voices = speechSynthesis.getVoices();
+    const config = VOICE_CONFIG[language][speakerType];
+    
+    for (const preferred of config.preferredVoices) {
+      const voice = voices.find(v => v.name.includes(preferred));
+      if (voice) return voice;
+    }
+    
+    const langCode = language === 'de' ? 'de-DE' : 'en-GB';
+    return voices.find(v => v.lang === langCode) || voices[0];
   }
 
   function parseDialogue(script) {
@@ -524,49 +429,7 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
     return parts;
   }
 
-  function stopPlayback() {
-    isPlaying = false;
-    speechSynthesis.cancel();
-  }
-
-  function updateHistoryGrid() {
-    const grid = document.getElementById('historyGrid');
-    const filter = document.getElementById('historyFilter').value;
-    const langFilter = document.getElementById('languageFilter').value;
-    
-    const allEpisodes = [];
-    
-    Object.keys(episodeHistory).forEach(key => {
-      const episodes = episodeHistory[key] || [];
-      episodes.forEach(ep => {
-        if ((filter === 'all' || ep.bunch === filter) &&
-            (langFilter === 'all' || ep.language === langFilter)) {
-          allEpisodes.push(ep);
-        }
-      });
-    });
-    
-    // Sort by date
-    allEpisodes.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    grid.innerHTML = allEpisodes.map(ep => `
-      <div class="history-item" onclick='showEpisodeModal(${JSON.stringify(ep).replace(/'/g, '&apos;')})'>
-        <div class="history-date">${new Date(ep.date).toLocaleDateString()}</div>
-        <div class="history-title">${ep.title}</div>
-        <div class="history-meta">
-          <span class="history-badge">${ep.bunch.replace('-', ' ')}</span>
-          <span class="history-lang">${ep.language.toUpperCase()}</span>
-        </div>
-      </div>
-    `).join('') || '<p class="no-episodes">No episodes yet. Generate your first episode!</p>';
-  }
-
-  function filterHistory() {
-    updateHistoryGrid();
-  }
-
-  // Make showEpisodeModal available globally
-  window.showEpisodeModal = showEpisodeModal;
+  window.toggleTranscript = toggleTranscript;
 </script>
 
 <style>
@@ -609,7 +472,7 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
   }
 
   main {
-    max-width: 1400px;
+    max-width: 1600px;
     margin: 0 auto;
     padding: 20px;
   }
@@ -711,9 +574,8 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
 
   .categories {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
     gap: 2rem;
-    margin-bottom: 3rem;
   }
 
   .category-card {
@@ -721,70 +583,25 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
     border-radius: 16px;
     padding: 1.5rem;
     box-shadow: 0 4px 6px var(--shadow);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  .category-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 12px var(--shadow);
   }
 
   .category-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
     margin-bottom: 1rem;
   }
 
   .category-icon {
     font-size: 2.5rem;
-  }
-
-  .category-card h3 {
-    font-size: 1.4rem;
-    color: var(--text);
-  }
-
-  .category-card p {
-    color: var(--text-secondary);
-    margin-bottom: 1.5rem;
-  }
-
-  .recent-episodes {
-    background: var(--background);
-    border-radius: 12px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    min-height: 120px;
-  }
-
-  .loading-placeholder {
-    color: var(--text-secondary);
-    text-align: center;
-    padding: 2rem;
-  }
-
-  .episode-item {
-    padding: 0.75rem;
     margin-bottom: 0.5rem;
-    background: var(--surface);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
   }
 
-  .episode-item:hover {
-    background: var(--primary);
-    color: white;
+  .category-header h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
   }
 
-  .episode-date {
-    font-size: 0.85rem;
-    opacity: 0.8;
-  }
-
-  .episode-title {
-    font-weight: 500;
+  .category-header p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
   }
 
   .generate-btn {
@@ -792,17 +609,17 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
     background: var(--primary);
     color: white;
     border: none;
-    padding: 1rem;
-    border-radius: 12px;
+    padding: 0.75rem;
+    border-radius: 8px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    margin-bottom: 1rem;
   }
 
   .generate-btn:hover:not(:disabled) {
     background: var(--primary-dark);
-    transform: translateY(-2px);
   }
 
   .generate-btn:disabled {
@@ -810,163 +627,73 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
     cursor: not-allowed;
   }
 
-  .history-section {
-    margin-top: 4rem;
+  .episodes-container {
+    max-height: 600px;
+    overflow-y: auto;
   }
 
-  .history-section h2 {
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .history-controls {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .history-controls select {
-    background: var(--surface);
-    color: var(--text);
-    border: 2px solid var(--border);
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-  }
-
-  .history-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .history-item {
-    background: var(--surface);
-    padding: 1.5rem;
+  .episode {
+    background: var(--background);
+    border: 1px solid var(--border);
     border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    padding: 1rem;
+    margin-bottom: 1rem;
   }
 
-  .history-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px var(--shadow);
+  .latest-episode {
+    border: 2px solid var(--primary);
   }
 
-  .history-date {
+  .episode-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 0.75rem;
+  }
+
+  .episode-header h4 {
+    font-size: 1.1rem;
+    flex: 1;
+    margin-right: 1rem;
+  }
+
+  .episode-date {
     color: var(--text-secondary);
     font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .history-title {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-
-  .history-meta {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .history-badge, .history-lang {
-    font-size: 0.8rem;
-    padding: 0.25rem 0.75rem;
-    background: var(--background);
-    border-radius: 20px;
-  }
-
-  .no-episodes {
-    text-align: center;
-    color: var(--text-secondary);
-    padding: 3rem;
-  }
-
-  /* Modal Styles */
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-  }
-
-  .modal-content {
-    background: var(--background);
-    margin: 2% auto;
-    padding: 2rem;
-    border-radius: 20px;
-    width: 90%;
-    max-width: 800px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 40px var(--shadow);
-  }
-
-  .close {
-    color: var(--text-secondary);
-    float: right;
-    font-size: 2rem;
-    font-weight: bold;
-    cursor: pointer;
-    line-height: 1;
-  }
-
-  .close:hover {
-    color: var(--text);
-  }
-
-  .episode-modal-header h2 {
-    margin-bottom: 1rem;
+    white-space: nowrap;
   }
 
   .episode-meta {
     display: flex;
     gap: 1rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
   }
 
-  .episode-badge {
-    background: var(--surface);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-
-  .episode-duration {
+  .meta-item {
+    font-size: 0.85rem;
     color: var(--text-secondary);
-    padding: 0.5rem 0;
   }
 
-  .audio-controls {
-    background: var(--surface);
-    padding: 2rem;
-    border-radius: 16px;
-    text-align: center;
-    margin: 2rem 0;
+  .episode-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
   }
 
-  .play-btn, .stop-btn {
+  .play-btn, .stop-btn, .transcript-btn {
     background: var(--primary);
     color: white;
     border: none;
-    padding: 1rem 2rem;
-    border-radius: 30px;
-    font-size: 1.1rem;
-    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
   }
 
-  .play-btn:hover, .stop-btn:hover {
+  .play-btn:hover, .transcript-btn:hover {
     background: var(--primary-dark);
-    transform: translateY(-2px);
   }
 
   .stop-btn {
@@ -977,43 +704,32 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
     background: #dc2626;
   }
 
-  .voice-info {
-    background: var(--surface);
-    padding: 1rem;
-    border-radius: 12px;
-    margin: 1rem 0;
-  }
-
   .transcript {
-    margin: 2rem 0;
-  }
-
-  .transcript summary {
-    cursor: pointer;
-    font-weight: 600;
-    padding: 1rem;
     background: var(--surface);
-    border-radius: 12px;
+    padding: 1rem;
+    border-radius: 8px;
     margin-bottom: 1rem;
   }
 
+  .transcript h5 {
+    margin-bottom: 1rem;
+    color: var(--primary);
+  }
+
   .transcript-content {
-    background: var(--surface);
-    padding: 2rem;
-    border-radius: 12px;
-    max-height: 400px;
+    max-height: 300px;
     overflow-y: auto;
   }
 
   .dialogue-line {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
   }
 
   .speaker {
     font-weight: 700;
     color: var(--primary);
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
   }
 
   .dialogue-text {
@@ -1021,8 +737,15 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
     display: block;
   }
 
-  .articles-section h3 {
-    margin-bottom: 1rem;
+  .articles {
+    background: var(--surface);
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .articles h5 {
+    margin-bottom: 0.75rem;
+    color: var(--primary);
   }
 
   .articles-list {
@@ -1030,16 +753,23 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
   }
 
   .articles-list li {
-    background: var(--surface);
-    padding: 1rem;
-    border-radius: 8px;
     margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .articles-list li:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
   }
 
   .articles-list a {
     color: var(--primary);
     text-decoration: none;
     font-weight: 500;
+    display: block;
+    margin-bottom: 0.25rem;
   }
 
   .articles-list a:hover {
@@ -1047,10 +777,44 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
   }
 
   .article-meta {
-    display: block;
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
     color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
+  }
+
+  .source {
+    font-style: italic;
+  }
+
+  .score {
+    font-weight: 600;
+    color: var(--secondary);
+  }
+
+  .no-episodes {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+  }
+
+  /* Scrollbar for episodes container */
+  .episodes-container::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .episodes-container::-webkit-scrollbar-track {
+    background: var(--surface);
+    border-radius: 3px;
+  }
+
+  .episodes-container::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+
+  .episodes-container::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
   }
 
   /* Responsive */
@@ -1069,10 +833,13 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
       grid-template-columns: 1fr;
     }
 
-    .modal-content {
-      margin: 5% auto;
-      width: 95%;
-      padding: 1.5rem;
+    .episode-header {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .episode-controls {
+      flex-wrap: wrap;
     }
   }
 </style>
