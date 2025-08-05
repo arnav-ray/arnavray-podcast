@@ -91,30 +91,36 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
 </Layout>
 
 <script>
-  // Voice configurations
+  // Voice configurations with strict German voice selection
   const VOICE_CONFIG = {
     en: {
       host: { 
         rate: 1.05,
         pitch: 1.15,
-        preferredVoices: ['Google UK English Female', 'Microsoft Zira', 'Samantha', 'Karen']
+        gender: 'female',
+        preferredVoices: ['Google UK English Female', 'Microsoft Zira', 'Samantha', 'Karen', 'Victoria']
       },
       expert: { 
         rate: 0.9,
         pitch: 0.85,
-        preferredVoices: ['Google UK English Male', 'Microsoft David', 'Daniel', 'Oliver']
+        gender: 'male',
+        preferredVoices: ['Google UK English Male', 'Microsoft David', 'Daniel', 'Oliver', 'Alex']
       }
     },
     de: {
       host: { 
         rate: 0.95,
         pitch: 1.1,
-        preferredVoices: ['Google Deutsch', 'Microsoft Hedda', 'Anna', 'Marlene']
+        gender: 'male',
+        preferredVoices: ['Google Deutsch Male', 'Microsoft Stefan - German (Germany)', 'Stefan', 'Hans', 'Conrad - German (Germany)'],
+        requiredLang: 'de-DE'
       },
       expert: { 
         rate: 0.85,
-        pitch: 0.8,
-        preferredVoices: ['Google Deutsch', 'Microsoft Stefan', 'Hans', 'Conrad']
+        pitch: 1.0,
+        gender: 'female', 
+        preferredVoices: ['Google Deutsch Female', 'Microsoft Katja - German (Germany)', 'Anna', 'Petra', 'Hedda - German (Germany)', 'Katja'],
+        requiredLang: 'de-DE'
       }
     }
   };
@@ -126,18 +132,17 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
 
   // Initialize
   document.addEventListener('DOMContentLoaded', () => {
-    initializeTheme();
+    // Set initial theme on HTML element
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.body.setAttribute('data-theme', savedTheme);
+    updateThemeToggle(savedTheme);
+    
     initializeLanguage();
     setupEventListeners();
     loadEpisodeHistory();
     loadVoices();
   });
-
-  function initializeTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    updateThemeToggle(savedTheme);
-  }
 
   function initializeLanguage() {
     const savedLang = localStorage.getItem('language') || 'en';
@@ -157,6 +162,7 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
       const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', newTheme);
+      document.body.setAttribute('data-theme', newTheme);
       localStorage.setItem('theme', newTheme);
       updateThemeToggle(newTheme);
     });
@@ -395,11 +401,80 @@ const title = 'Daily AI Podcasts - 5 Categories in English & German';
     const voices = speechSynthesis.getVoices();
     const config = VOICE_CONFIG[language][speakerType];
     
+    console.log(`Finding voice for ${language} ${speakerType} (${config.gender})`);
+    console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+    
+    // For German, strictly filter for German voices only
+    if (language === 'de') {
+      // First filter: ONLY German voices
+      const germanVoices = voices.filter(v => 
+        v.lang === 'de-DE' || 
+        v.lang === 'de_DE' ||
+        v.lang.startsWith('de-')
+      );
+      
+      console.log('German voices found:', germanVoices.map(v => v.name));
+      
+      // Try to find preferred German voice
+      for (const preferred of config.preferredVoices) {
+        const voice = germanVoices.find(v => 
+          v.name.includes(preferred) || 
+          v.name === preferred
+        );
+        if (voice) {
+          console.log(`Selected German voice: ${voice.name}`);
+          return voice;
+        }
+      }
+      
+      // Gender-based fallback for German
+      if (config.gender === 'female') {
+        const femaleVoice = germanVoices.find(v => 
+          v.name.toLowerCase().includes('female') ||
+          v.name.toLowerCase().includes('frau') ||
+          v.name.includes('Katja') ||
+          v.name.includes('Hedda') ||
+          v.name.includes('Anna') ||
+          v.name.includes('Petra') ||
+          v.name.includes('Marlene')
+        );
+        if (femaleVoice) {
+          console.log(`Selected German female voice: ${femaleVoice.name}`);
+          return femaleVoice;
+        }
+      } else {
+        const maleVoice = germanVoices.find(v => 
+          v.name.toLowerCase().includes('male') && !v.name.toLowerCase().includes('female') ||
+          v.name.toLowerCase().includes('mann') ||
+          v.name.includes('Stefan') ||
+          v.name.includes('Hans') ||
+          v.name.includes('Conrad') ||
+          v.name.includes('Markus')
+        );
+        if (maleVoice) {
+          console.log(`Selected German male voice: ${maleVoice.name}`);
+          return maleVoice;
+        }
+      }
+      
+      // Last resort: any German voice
+      if (germanVoices.length > 0) {
+        console.log(`Using any German voice: ${germanVoices[0].name}`);
+        return germanVoices[0];
+      }
+      
+      // No German voice found - alert user
+      console.error('No German voice found! Please install German language pack.');
+      alert('No German voice found! Please install German language support in your operating system.');
+    }
+    
+    // For English voices
     for (const preferred of config.preferredVoices) {
       const voice = voices.find(v => v.name.includes(preferred));
       if (voice) return voice;
     }
     
+    // Fallback to language match
     const langCode = language === 'de' ? 'de-DE' : 'en-GB';
     return voices.find(v => v.lang === langCode) || voices[0];
   }
